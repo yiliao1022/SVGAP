@@ -1,0 +1,328 @@
+# Known Types
+# Knowntype_string                  | Type           |   EDAM                                                             | Comment 
+aaindex_data                        | file           |  "EDAM_data:1501 Amino acid index"                              | AAINDEX entry
+aaindex_database                    | file           |                                                                    | AAINDEX database
+abi_trace                           | file           |  "EDAM_data:0924 Sequence trace"                                | ABI sequencing trace
+acd_file                            | file           |                                                                    | EMBOSS ACD file
+ajint_ajlong_data                   | file           |                                                                    | Standard format info on ajint and ajlong
+alistat_input                       | file           |  "EDAM_data:1384 Sequence alignment (protein)"                  | HMMER alistat program input
+alistat_output                      | file           |  "EDAM_data:2083 Alignment report"                              | HMMER alistat program output  
+amino_acid_classification           | file           |  "EDAM_data:1502 Amino acid index (chemical classes)"           | Amino acid chemical classes data
+amino_acid_frequencies              | file           |  "EDAM_data:1535 Peptide fragment molecular weight frequencies" | Amino acid frequencies data
+amino_acid_hydropathy               | file           |  "EDAM_data:1506 Amino acid index (hydropathy)"                 | Amino acid hydropathy values data
+amino_acid_pka                      | file           |  "EDAM_data:1529 Protein pKa value"
+amino_acid_properties               | file           |  "EDAM_data:1502 Amino acid index (chemical classes)"           | Amino acids properties and molecular weight data
+ancestral_states                    | properties     |  "EDAM_data:1427 Phylogenetic discrete data"                    | Phylip ancestral states file
+ascii_text                          | file           |  "EDAM_data:0969 Text"                                          | ASCII text
+background_markov_model_meme        | file           |  "EDAM_data:1364 Hidden Markov model"                           | MEME background Markov model
+base_pair_stacking_energies         | file           |  "EDAM_data:1588 DNA base pair stacking energies data"          | DNA base pair stacking energies data
+base_pair_twist_angles              | file           |  "EDAM_data:1589 DNA base pair twist angle data"                | DNA base pair twist angle data
+base_trimer_roll_angles             | file           |  "EDAM_data:1590 DNA base trimer roll angles data"              | DNA base trimer roll angles data
+blast_nucleotide_dbname             | string         |  "EDAM_data:1056 Database name"                           | Blast nucleotide database name
+blast_protein_dbname                | string         |  "EDAM_data:1056 Database name"                           | Blast protein database name
+cds_sequence                        | sequence       |  "EDAM_data:0849 Sequence record"                               | Coding
+cirdna_mapping_commands             | file           |  "EDAM_data:2152 Rendering parameter"                           | Commands to the cirdna drawing program
+clique_input                        | file           |  "EDAM_data:1427 Phylogenetic discrete data"                    | Phylip clique program input
+clique_output                       | file           |  "EDAM_data:1428 Phylogenetic report (cliques)"                 | Phylip clique program output
+clustalo_distance_matrix            | distances      |  "EDAM_data:0870 Sequence distance matrix"                      | Clustalo distance matrix
+clustalo_guide_tree                 | file           |  "EDAM_data:0872 Phylogenetic tree"                             | Clustalo guide tree         
+clustalo_hmm                        | file           |  "EDAM_data:1384 Sequence alignment (protein)"                  | Pre-aligned protein multiple sequence file
+clustalo_profile                    | file           |  "EDAM_data:1384 Sequence alignment (protein)"                  | Pre-aligned protein multiple sequence file
+codon_list                          | string         |  "EDAM_data:0848 Raw sequence"                                  | Codon triplet(s)
+codon_usage                         | codon          |  "EDAM_data:1597 Codon usage table"                             | Codon usage
+comparison_matrix                   | file           |  "EDAM_data:0874 Comparison matrix"                             | Comparison matrix file
+comparison_matrix_name              | string         |  "EDAM_data:0874 Comparison matrix"                             | Comparison matrix name
+compseq_output                      | file           |  "EDAM_data:1261 Sequence property (composition)"               | Program compseq output
+contact                             | file           |  "EDAM_data:1547 Protein contact map"                           | Structure contacts
+continuous_character                | frequencies    |  "EDAM_data:1426 Phylogenetic continuous quantitative data"     | Continuous character frequency
+continuous_character_frequency      | file           |  "EDAM_data:1426 Phylogenetic continuous quantitative data"     | Phylip continuous character frequency
+contml_input                        | file           |  "EDAM_data:1426 Phylogenetic continuous quantitative data"     | Phylip contml program input
+contml_output                       | file           |  "EDAM_data:0872 Phylogenetic tree"                             | Phylip contml program output
+contrast_output                     | file           |  "EDAM_data:1444 Phylogenetic report (character contrasts)"     | Phylip contrast program output
+database_metadata                   | file           |  "EDAM_data:0957 Database metadata"                             | Database metadata
+database_cross-reference_list       | file           |  "EDAM_data:2093 Data reference"                                | List of database cross-references
+database_info                       | file           |  "EDAM_data:0957 Database metadata"                             | Database information
+database_release                    | string         |  "EDAM_data:1670 Database version information"                  | Database name and release number
+date                                | string         |  "EDAM_data:2156 Date"                                          | Date in dd/mm/yy format
+dendrogram                          | file           |  "EDAM_data:0872 Phylogenetic tree"                             | Dendrogram (tree file) from clustalw         
+dictionary_of_heterogen_groups      | file           |  "EDAM_data:2240 Heterogen annotation"                          | Dictionary of heterogen groups
+dirichlet_prior_hmmer               | file           |  "EDAM_data:1347 Dirichlet distribution"                        | HMMER dirichlet prior
+dirichlet_prior_meme                | file           |  "EDAM_data:1347 Dirichlet distribution"                        | MEME dirichlet prior
+discrete_characters_input           | file           |  "EDAM_data:1427 Phylogenetic discrete data"                    | Phylip discrete characters
+discrete_characters                 | discretestates |  "EDAM_data:1427 Phylogenetic discrete data"                    | Phylip character discrete states
+discrete_states                     | discretestates |  "EDAM_data:1427 Phylogenetic discrete data"                    | Phylip discrete states
+discriminator                       | file           |  "EDAM_data:1354 Sequence profile"                              | Discriminator
+distance_matrix                     | distances      |  "EDAM_data:0870 Sequence distance matrix"                      | Phylip distance matrix
+dna_fasta                           | file           |  "EDAM_data:2887 Sequence record (nucleic acid)"                | Nucleotide sequence in FASTA format
+dna_fasta_set                       | file           |  "EDAM_data:2887 Sequence record (nucleic acid)"                | Nucleotide sequences in FASTA format
+dnacomp_output                      | file           |  "EDAM_data:0872 Phylogenetic tree"                             | Phylip dnacomp program output
+dnadist_output                      | file           |  "EDAM_data:0870 Sequence distance matrix"                      | Phylip dnadist program output
+dnainvar_output                     | file           |  "EDAM_data:1429 Phylogenetic report (invariants)"              | Phylip dnainvar program output
+dnaml_output                        | file           |  "EDAM_data:0872 Phylogenetic tree"                             | Phylip dnaml program output
+dnamlk_output                       | file           |  "EDAM_data:0872 Phylogenetic tree"                             | Phylip dnamlk program output
+dnapars_output                      | file           |  "EDAM_data:0872 Phylogenetic tree"                             | Phylip dnapars program output
+dnapenny_output                     | file           |  "EDAM_data:0872 Phylogenetic tree"                             | Phylip dnapenny program output
+dollop_input                        | file           |  "EDAM_data:1427 Phylogenetic discrete data"                    | Phylip dollop program input
+dollop_output                       | file           |  "EDAM_data:0872 Phylogenetic tree"                             | Phylip dollop program output
+dolpenny_input                      | file           |  "EDAM_data:1427 Phylogenetic discrete data"                    | Phylip dolpenny program input
+dolpenny_output                     | file           |  "EDAM_data:0872 Phylogenetic tree"                             | Phylip dolpenny program output
+domain_alignment                    | file           |  "EDAM_data:1384 Sequence alignment (protein)"                  | Domain alignment
+domain_ambiguities                  | file           |  "EDAM_data:0849 Sequence record"                               | Domain ambiguities
+domain_classification               | file           |  "EDAM_data:0900 Protein domain classification"                 | Domain classification
+domain_clean_coordinates            | file           |  "EDAM_data:1468 Protein domain"                                | Clean domain coordinates
+domain_families                     | file           |  "EDAM_data:0849 Sequence record"                               | Domain families
+domain_hits                         | file           |  "EDAM_data:0849 Sequence record"                               | Domain hits
+domain_hits_filter                  | file           |  "EDAM_data:0849 Sequence record"                               | Domain hits filter
+domain_pdb                          | file           |  "EDAM_data:1468 Protein domain"                                | Domain pdb
+domainatrix_calculations_log        | file           |  "EDAM_data:1678 Tool log"                                      | Domainatrix calculations log
+domainatrix_ligand_hits             | file           |  "EDAM_data:0857 Database hits (sequence)"                      | Domainatrix LHF ligand hits
+domainatrix_log                     | file           |  "EDAM_data:1678 Tool log"                                      | Domainatrix log
+domainatrix_signature               | file           |  "EDAM_data:1354 Sequence profile"                              | Domainatrix signature
+domainatrix_substitution_matrix     | file           |  "EDAM_data:1499 3D-1D scoring matrix"                          | Domainatrix substitution matrix
+drawgram_output                     | file           |  "EDAM_data:0872 Phylogenetic tree"                             | Phylip drawgram output
+drawtree_output                     | file           |  "EDAM_data:0872 Phylogenetic tree"                             | Phylip drawtree output
+edam_relations                      | file           |                                                                    | EDAM relations
+email_address                       | string         |  "EDAM_data:1691 Email address"                           | Email address
+embassy_package                     | string         |  "EDAM_data:1195 Tool name (EMBASSY package)"             | EMBASSY package name
+emboss_database_directory           | directory      |  "EDAM_data:1049 Directory name"                          | Database directory
+emboss_database_field               | string         |  "EDAM_data:2527 Parameter or primitive"                        | Database field
+emboss_database_index               | file           |  "EDAM_data:1049 Directory name"                          | Index
+emboss_database_name                | string         |  "EDAM_data:1056 Database name"                           | Database name
+emboss_database_release             | string         |  "EDAM_data:1670 Database version information"                  | Database release number
+emboss_database_wildcard_filename   | string         |  "EDAM_data:1050 File name"                               | Database wildcard filename
+emboss_datafile                     | file           |  "EDAM_data:0957 Database metadata"                             | EMBOSS datafile
+emboss_keyword                      | string         |  "EDAM_data:0968 Keyword"                                       | EMBOSS program keyword
+emboss_knowntypes                   | file           |                                                                    | EMBOSS known types
+emboss_program                      | string         |  "EDAM_data:1194 Tool name (EMBOSS)"                      | EMBOSS program name
+emboss_resource_name                | string         |  "EDAM_data:2527 Parameter or primitive"                        | Resource name
+emboss_server_name                  | string         |  "EDAM_data:2527 Parameter or primitive"                        | Server name
+emboss_server_cache_file            | file           |  "EDAM_data:2527 Parameter or primitive"                        | Server cache
+embossversion_output                | file           |  "EDAM_data:1671 Tool version information"                      | EMBOSS version
+entry_full_text                     | file           |  "EDAM_data:0957 Database metadata"                             | Full text
+enzyme_data                         | file           |  "EDAM_data: Enzymatic reaction data"                        | Enzyme kinetics data (application-specific)
+enzyme_list                         | string         |  "EDAM_data: Restriction enzyme name"                        | Restriction enzyme name list
+enzyme_name                         | string         |  "EDAM_data: Restriction enzyme name"                        | Restriction enzyme name
+est_sequence                        | sequence       |  "EDAM_data: Nucleotide sequence"                            | Spliced EST
+exp_file                            | file           |  "EDAM_data: EXP assembly project file"                      | EXP assembly project file
+exp_file_of_filenames               | file           |  "EDAM_data: List of file names"                             | EXP assembly project file of filenames
+external_program                    | string         |  "EDAM_data: Generic application name"                       | External program name
+factor_input                        | file           |  "EDAM_data: PHYLIP discrete states file"                    | Phylip factor program input
+factor_output                       | file           |  "EDAM_data: PHYLIP discrete states file"                    | Phylip factor program output
+feature_key                         | string         |  "EDAM_data: Sequence feature type"                          | Feature table keys with wildcards, separated by pipe character
+feature_key_list                    | string         |  "EDAM_data: List of sequence feature types"                 | List of feature table key 
+feature_source_list                 | string         |  "EDAM_data: List of sequence feature sources"               | List of feature sources with wildcards, separated by pipe character
+feature_tag_list                    | string         |  "EDAM_data: List of sequence feature tags"                  | List of feature tags with wildcards, separated by pipe character   
+feature_tagvalue_list               | string         |  "EDAM_data: Generic string"                                 | List of feature tag values with wildcards, separated by pipe character  
+file_extension                      | string         |  "EDAM_data: File extension"                                 | Filename extension
+filename                            | string         |  "EDAM_data: File name"                                      | Input base filename
+file_basename                       | string         |  "EDAM_data: File name"                                      | Input filename base name
+filename_prefix                     | string         |  "EDAM_data: File name"                                      | Input filename prefix
+filename_wildcard                   | string         |  "EDAM_data: File name"                                      | Input filename wildcard
+fitch_input                         | file           |  "EDAM_data: PHYLIP phylogenetic distance matrix file"       | Phylip fitch program input
+fitch_output                        | file           |  "EDAM_data: Phylip phylogenetic tree raw data"              | Phylip fitch program output
+float_gap_extension                 | float          |  "EDAM_data: Floating point gap extension penalty"           | Affine gap extension penalty
+float_gap_penalty                   | float          |  "EDAM_data: Floating point gap opening penalty"             | Affine gap penalty
+freqboot_input                      | file           |                                                 | Phylip freqboot program input
+freqboot_output                     | file           |                                                 | Phylip freqboot program output
+gendist_input                       | frequencies    |  "EDAM_data: PHYLIP phylogenetic character frequencies file" | Phylip gendist program input
+gendist_output                      | file           |  "EDAM_data: PHYLIP phylogenetic distance matrix file"       | Phylip gendist program output
+genetic_code                        | list           |  "EDAM_data: Genetic code"                                   | Standard genetic code
+genomic_sequence                    | sequence       |  "EDAM_data: Nucleotide sequence"                            | Unspliced genomic
+gff                                 | file           |  "EDAM_data: Sequence feature table file"                    | GFF format features
+hits                                | file           |  "EDAM_data: EMBASSY domain hits report"                     | Hits
+hmm                                 | file           |  "EDAM_data: HMMER hidden Markov model"                      | HMMER hidden markov model
+hmm_database                        | file           |  "EDAM_data: HMMER hidden Markov model database"             | HMMER hmm database
+hmm_database_name                   | string         |  "EDAM_data: Sequence profile database name"                 | HMMER hmm database name
+hmm_entry_name                      | string         |  "EDAM_data: HMMER hidden Markov model identifier"           | HMMER hmm database entry id
+hmmalign_output                     | file           |  "EDAM_data: HMMER hidden Markov model"                      | HMMER hmmalign program output
+hmmcalibrate_output                 | file           |  "EDAM_data: HMMER hidden Markov model"                      | HMMER hmmcalibrate program output
+hmmemit_output                      | file           |  "EDAM_data: HMMER synthetic sequences record"               | HMMER hmmemit program output
+hmmer_alignment                     | file           |  "EDAM_data: HMMER sequence alignment file"                  | HMMER alignment
+hmmer_count                         | file           |  "EDAM_data: HMMER emission and transition count report"     | HMMER emission and transition count
+hmmer_histogram                     | file           |  "EDAM_data: Histogram graph data"                           | HMMER histogram
+hmmer_matrix                        | file           |  "EDAM_data: Amino acid comparison matrix"                   | HMMER matrix
+hmmer_null_model                    | file           |  "EDAM_data: HMMER NULL hidden Markov model"                 | HMMER null model
+hmmpfam_output                      | file           |  "EDAM_data: HMMER alignment report (sequences versus HMMs)" | HMMER hmmpfam program output
+hmmsearch_output                    | file           |  "EDAM_data: HMMER alignment report (HMM versus sequences)"  | HMMER hmmsearch program output
+input_directory                     | directory      |  "EDAM_data: Directory name"                                 | Input directory
+integer_gap_extension               | integer        |  "EDAM_data: Integer gap extension penalty"                  | Affine gap extension penalty
+integer_gap_penalty                 | integer        |  "EDAM_data: Integer gap opening penalty"                    | Affine gap penalty
+integer_long_data                   | file           |                                                         | Standard format information on int and long data
+inverted_output                     | file           |  "EDAM_data: Sanger inverted repeat sequence map report"     | Sanger Centre program inverted output
+jaspar_database                     | file           |  "EDAM_data: JASPAR database"                                | JASPAR database
+jaspar_matrix_id                    | string         |  "EDAM_data: JASPAR profile identifier"                      | JASPAR matrix identifier
+keyword                             | string         |  "EDAM_data: Keywords"                                       | Keyword
+keywords                            | file           |  "EDAM_data: Keywords"                                       | Keywords file
+kitsch_input                        | file           |                                                 | Phylip kitsch program input
+kitsch_output                       | file           |  "EDAM_data: Phylip phylogenetic tree raw data"              | Phylip kitsch program output
+ligand_list                         | file           |  "EDAM_data: List of HET group strings"                      | Domainatrix ligand code list
+lindna_mapping_commands             | file           |                                                 | Commands to the lindna drawing program
+log                                 | file           |  "EDAM_data: Application log file"                           | General log
+mast_output                         | file           |  "EDAM_data: MAST alignment report"                          | MAST program output
+matrix                              | file           |  "EDAM_data: Position Weight Matrix (PWM)"                   | Weight matrix
+megamerger_report                   | report         |  "EDAM_data: EMBOSS megamerger log file"                     | Report file from megamerger program
+meme_alphabet                       | file           |  "EDAM_data: MEME motif alphabet"                            | MEME motif alphabet
+meme_database                       | file           |  "EDAM_data: Sequence database"                              | MEME database
+meme_background_frequencies         | file           |  "EDAM_data: MEME background frequencies file"               | MEME background frequencies file
+meme_motif_order                    | string         |  "EDAM_data: MEME motifs directive file"                     | MEME directive for ordering and spacing of motifs
+meme_output                         | file           |  "EDAM_data: MEME sequence motif record"                     | MEME program output
+meme_text_output                    | file           |                                                 | MEME program text output
+mira_parameters                     | file           |                                                 | MIRA program parameters
+mira_strain_data                    | file           |  "EDAM_data: MIRA strain data file"                          | MIRA program strain data file
+mix_input                           | file           |                                                 | Phylip mix program input
+mix_output                          | file           |  "EDAM_data: PHYLIP discrete states file"                    | Phylip mix program output
+molecular_weights                   | file           |  "EDAM_data: Amino acid molecular weight data"               | Molecular weights
+mrna_sequence                       | sequence       |  "EDAM_data: RNA sequence"                                   | Messenger RNA
+multistate_factors                  | properties     |  "EDAM_data: PHYLIP discrete states file"                    | Phylip multistate factors
+naccess_log                         | file           |  "EDAM_data: NACCESS log file"                               | Naccess program log
+name                                | string         |  "EDAM_data: Generic string"                                 | Single word without spaces
+name_prefix                         | string         |  "EDAM_data: Generic string"                                 | First part of a name
+name_suffix                         | string         |  "EDAM_data: Generic string"                                 | Last part of a name
+ncbi_taxonomy                       | file           |                                                         | NCBI taxonomy
+needleall_error                     | file           |  "EDAM_data: EMBOSS needleall log file"                      | Program needleall errors
+neighbor_input                      | file           |                                                         | Phylip neighbor program input
+neighbor_output                     | file           |  "EDAM_data: Phylip phylogenetic tree raw data"              | Phylip neighbor program output
+newcoils_datafile                   | file           |                                                         | Program newcoils data
+newick                              | tree           |  "EDAM_data: PHYLIP phylogenetic tree report"                | Phylip tree
+newick_tree                         | file           |  "EDAM_data: PHYLIP phylogenetic tree report"                | Phylip tree
+non_coding_sequence                 | sequence       |  "EDAM_data: Nucleotide sequence"                            | Non-coding
+nucleotide_codes                    | string         |  "EDAM_data: Nucleotide code string"                         | DNA/RNA sequence characters
+nucleotide_sequence                 | string         |  "EDAM_data: Nucleotide sequence"                            | DNA/RNA sequence
+obo_file                            | file           |  "EDAM_data: Ontological data"                               | OBO file
+ontology_name                       | file           |  "EDAM_data: Ontology name"                                  | Ontology name
+output_delimiter                    | string         |  "EDAM_data: Generic string"                                 | Delimiter between fields in single line output
+output_general                      | file           |  "EDAM_data: Generic file"                                   | General output
+output_filename                     | string         |  "EDAM_data: File name"                                      | Output filename
+output_format                       | string         |  "EDAM_data: Generic enumerated string"                      | Output file format
+output_identifier                   | string         |  "EDAM_data: Generic string"                                 | Identifier to be used in output
+overlap                             | file           |                                                         | Sequence overlap lengths
+pars_output                         | file           |  "EDAM_data: Phylip phylogenetic tree raw data"              | Phylip pars program output
+pdb                                 | file           |  "EDAM_data: PDB record"                                     | Pdb entry
+pdb_prefix                          | string         |  "EDAM_data: PDB identifier"                                 | Pdb entry prefix
+penny_input                         | file           |                                                         | Phylip penny program input
+penny_output                        | file           |  "EDAM_data: Phylip phylogenetic tree raw data"              | Phylip penny program output
+pepstats_output                     | file           |  "EDAM_data: Protein physicochemical profile"                | Pepstats program output
+peptide_molweights                  | file           |  "EDAM_data: Peptide molecular weight data"                  | Peptide molecular weight values
+phd_file_of_filenames               | file           |  "EDAM_data: List of file names"                             | PHD assembly project file of filenames
+phd_sequences                       | file           |  "EDAM_data: PHD assembly project file"                      | PHD assembly project sequences file
+phylip_ancestor                     | file           |  "EDAM_data: PHYLIP discrete states file"                    | Phylip ancestor data
+phylip_category_values              | string         |                                                         | Space-separated phylip category values
+phylip_factor                       | file           |  "EDAM_data: PHYLIP discrete states file"                    | Phylip factor data
+phylip_font                         | string         |  "EDAM_data: File name"                                      | Phylip font
+phylip_mix                          | file           |  "EDAM_data: PHYLIP discrete states file"                    | Phylip mix data
+phylip_probability_values           | string         |                                                         | Space-separated phylip probability values
+plot_colour                         | string         |  "EDAM_data: Generic enumerated string"                      | Plot colour name
+plot_shading                        | string         |  "EDAM_data: Generic enumerated string"                      | Plot shading BPLW in any order
+postscript                          | file           |                                                         | Postscript
+primer3_mishybridizing              | file           |  "EDAM_data: Primer3 internal oligo mishybridizing library"  | Primer3 internal oligo mishybridizing library
+primer3_mispriming                  | file           |  "EDAM_data: Primer3 mispriming library file"                | Primer3 mispriming library
+primer3_output                      | file           |  "EDAM_data: Primer3 primer report"                          | Whitehead primer3_core program output
+primer_pairs                        | file           |  "EDAM_data: Primer pairs sequence record"                   | Primer pairs
+prints_database                     | file           |  "EDAM_data: PRINTS database"                                | PRINTS database
+profile                             | file           |  "EDAM_data: Sequence profile"                               | Profile data
+profile_or_matrix                   | file           |  "EDAM_data: Sequence profile"                               | Profile or weight matrix
+program_name                        | string         |  "EDAM_data: Generic application name"                       | Program name with command line options to follow
+proml_output                        | file           |  "EDAM_data: Phylip phylogenetic tree raw data"              | Phylip proml program output
+promlk_output                       | file           |  "EDAM_data: Phylip phylogenetic tree raw data"              | Phylip promlk program output
+prosite_database                    | file           |  "EDAM_data: Prosite database"                               | PROSITE database
+prosite_nucleotide_pattern          | string         |  "EDAM_data: Prosite nucleotide pattern"                     | PROSITE nucleotide pattern
+prosite_pattern                     | string         |  "EDAM_data: Prosite protein pattern"                        | PROSITE protein pattern
+protdist_input                      | file           |                                                         | Phylip protdist program input
+protdist_output                     | file           |  "EDAM_data: PHYLIP phylogenetic distance matrix file"       | Phylip protdist program output
+protein_clean_coordinates           | file           |  "EDAM_data: Protein tertiary structure"                     | Clean protein structure coordinates
+protein_codes                       | string         |  "EDAM_data: Amino acid code string"                         | Protein sequence characters
+protein_fasta                       | file           |  "EDAM_data: Protein FASTA record"                           | Protein sequence in FASTA format
+protein_fasta_set                   | file           |  "EDAM_data: Protein FASTA record"                           | Protein sequences in FASTA format
+protein_sequence                    | file           |  "EDAM_data: Sequence record (protein)"                           | Protein sequence in FASTA format
+protpars_input                      | file           |                                                         | Phylip protpars program input
+protpars_output                     | file           |  "EDAM_data: Phylip phylogenetic tree raw data"              | Phylip protpars program output
+quicktandem_output                  | file           |  "EDAM_data: quicktandem repeat sequence map report"         | Sanger Centre program quicktandem output
+raw_cath_domlist                    | file           |  "EDAM_data: Raw CATH classification (description) file"     | Raw cath domlist
+raw_cath_list                       | file           |  "EDAM_data: Raw CATH classification (list) file"            | Raw cath list
+raw_cath_names                      | file           |  "EDAM_data: Raw CATH classification (names) file"           | Raw cath names
+raw_dictionary_of_heterogen_groups  | file           |  "EDAM_data: HET group dictionary"                           | Raw dictionary of heterogen groups
+raw_scop_classification             | file           |  "EDAM_data: Raw SCOP classification file"                   | Raw scop classification
+raw_scop_description                | file           |  "EDAM_data: Raw SCOP classification (description) file"     | Raw scop description
+rebase_proto                        | file           |  "EDAM_data: REBASE proto record"                            | REBASE database proto
+rebase_withrefm                     | file           |  "EDAM_data: REBASE withrefm record"                         | REBASE database withrefm
+regular_expression                  | string         |  "EDAM_data: Regular expression"                             | Regular expression
+restboot_input                      | file           |                                                         | Phylip restboot program input
+restboot_output                     | file           |  "EDAM_data: Phylip bootstrapped sequence data"              | Phylip restboot program output
+restdist_output                     | file           |  "EDAM_data: PHYLIP phylogenetic distance matrix file"       | Phylip restdist program output
+restml_input                        | file           |                                                         | Phylip restml program input
+restml_output                       | file           |  "EDAM_data: Phylip phylogenetic tree raw data"              | Phylip restml program output
+restriction_enzyme_data             | file           |  "EDAM_data: Restriction enzyme pattern data"                | Restriction enzyme data
+restriction_enzyme_methylation_data | file           |  "EDAM_data: Restriction enzyme reference data"              | Restriction enzyme methylation data
+rna_concentration                   | file           |  "EDAM_data: Vienna RNA concentration data"                  | Vienna RNA concentration data
+rna_constraint                      | file           |  "EDAM_data:0866 Sequence alignment metadata"        | Vienna RNA structure constraints
+rna_parameter                       | file           |  "EDAM_data:2527 Parameter or primitive"             | Vienna RNA parameters
+rna_structures                      | file           |  "EDAM_data: Vienna RNA secondary structure record"          | Vienna RNA structures
+rnaeval_output                      | file           |  "EDAM_data: Vienna RNA calculated energy"                   | Vienna RNAeval output
+rnafold_output                      | file           |  "EDAM_data: Vienna RNA secondary structure record"          | Vienna RNAfold output
+rnalfold_output                     | file           |  "EDAM_data: Vienna local RNA secondary structure record"    | Vienna RNALfold output
+rocplot_summary                     | file           |  "EDAM_data: Receiver operating characteristic (ROC) data"   | Rocplot summary
+secondary_structure                 | file           |  "EDAM_data: Secondary structure"                            | Secondary structure
+scf_file                            | file           |  "EDAM_data: SCF assembly project file"                      | SCF assembly project file 
+selex                               | file           |  "EDAM_data: Multiple sequence alignment record"             | Selex alignment
+seqalign_input                      | file           |  "EDAM_data: EMBASSY domain hits report"                     | Program seqalign input
+seqboot_input                       | file           |  "EDAM_data: Phylip bootstrapped sequence data"              | Phylip seqboot program input
+seqboot_output                      | file           |  "EDAM_data: Phylip bootstrapped sequence data"              | Phylip seqboot program output
+seqbootdisc_output                  | file           |  "EDAM_data: PHYLIP discrete states file"                    | Phylip seqboot_disc program output
+seqbootfreq_output                  | file           |  "EDAM_data: Phylip bootstrapped sequence data"              | Phylip seqboot_freq program output
+seqbootrest_output                  | file           |  "EDAM_data: Phylip bootstrapped sequence data"              | Phylip seqboot_rest program output
+seqbootseq_output                   | file           |  "EDAM_data: Phylip bootstrapped sequence data"              | Phylip seqboot_seq program output
+sequence                            | string         |  "EDAM_data: Sequence"                                       | Sequence
+sequence_data                       | file           |  "EDAM_data: Sequence"                                       | Sequence
+sequence_fasta                      | file           |  "EDAM_data: FASTA record"                                   | Nucleotide or protein sequence in FASTA format
+sequence_fasta_set                  | file           |  "EDAM_data: FASTA record"                                   | Nucleotide or protein sequences in FASTA format
+sequence_id_input                   | string         |  "EDAM_data: Sequence unique identifier"                     | Sequence identifier for an input sequence
+sequence_id_list                    | string         |  "EDAM_data: List of sequence unique identifiers"            | Sequence identifier list or @filename for input sequences
+sequence_id_output                  | string         |  "EDAM_data: Sequence unique identifier"                     | Sequence identifier for an output sequence
+sequence_mask_character             | string         |  "EDAM_data: Sequence mask character"                        | Sequence code or space (lowercase) for sequence masking
+sequence_overlap                    | file           |                                                         | Sequence overlaps
+sequence_range                      | string         |  "EDAM_data: Sequence position range"                        | Sequence range in the format nn..nn
+sequence_read_quality               | file           |  "EDAM_data: Sequence read quality scores"                   | Sequence read quality scores
+sequence_type                       | string         |  "EDAM_data: EMBOSS sequence type"                           | EMBOSS sequence type
+sequence_trace_information          | file           |  "EDAM_data: MIRA sequence trace information file"           | Sequence trace information
+signature_alignment                 | file           |  "EDAM_data: Domainatrix signature alignment report"         | Domainatrix signature alignment
+sigscanlig_output                   | file           |  "EDAM_data: Domainatrix signature alignment report"         | Domainatrix sigscanlig program output
+sim4_output                         | file           |  "EDAM_data: Pairwise hybrid sequence alignment data"        | Sim4 program output
+sites_log                           | file           |  "EDAM_data: EMBOSS sites log file"                          | Sites log
+sort_utility_options                | string         |  "EDAM_data: Generic string"                                 | Command line options for the system sort utility
+standard_molecular_weights          | file           |  "EDAM_data: Molecular weights standard fingerprint"         | Molecular weight standards
+strain_name                         | string         |  "EDAM_data: Strain name"                                    | Strain name
+stride_log                          | file           |  "EDAM_data: STRIDE log file"                                | Stride program log
+string                              | string         |  "EDAM_data: Generic string"                                 | Any string value
+supermatcher_error                  | file           |  "EDAM_data: EMBOSS supermatcher error file"                 | Program supermatcher errors
+swissprot_database                  | file           |  "EDAM_data: SwissProt database"                             | Swissprot-format database
+swissprot_pdb_equivalence           | file           |  "EDAM_data: SwissProt to PDB mapping"                       | Swissprot:pdb equivalence
+swissprot_pdb_equivalence_table     | file           |  "EDAM_data: SwissProt to PDB mapping"                       | Swissprot:pdb equivalence table
+tandem_output                       | file           |  "EDAM_data: quicktandem repeat sequence map report"         | Sanger Centre program tandem output
+temporary                           | file           |  "EDAM_data: Generic file"                                   | Temporary working
+testcode_data                       | file           |  "EDAM_data: EMBOSS data file"                               | Testcode data
+text_documentation                  | file           |  "EDAM_data: Application bibliographic information"          | Program documentation text
+threshold_identity_similar_related  | array          |  "EDAM_data: Generic float array"                            | Three floating point threshold values for identical, similar and related residues
+tool_metadata                       | file           |  "EDAM_data: Tool metadata"                                  | Tool metadata
+translated_cds_sequence             | sequence       |  "EDAM_data: Protein sequence"                               | Translated coding
+transfac_data                       | file           |  "EDAM_data: TRANSFAC database"                              | Transfac database data
+transfac_site                       | file           |  "EDAM_data: TRANSFAC database"                              | Transfac database sites
+treedist_output                     | file           |  "EDAM_data: Phylip phylogenetic tree distance data"         | Phylip treedist program output
+two_state_characters                | discretestates |  "EDAM_data: PHYLIP discrete states file"                    | Two state characters
+url_host_address                    | string         |  "EDAM_data: URI"                                            | URL host address
+url_path                            | string         |  "EDAM_data: Directory name"                                 | URL path
+url_port                            | integer        |  "EDAM_data: URI"                                            | URL port
+url_prefix                          | string         |  "EDAM_data: URL"                                            | Prefix for all URLs
+url_suffix                          | string         |  "EDAM_data: URL"                                            | Suffix for all URLs
+usa_list                            | file           |  "EDAM_data: List of EMBOSS Uniform Sequence Addresses"      | List of USAs
+van_der_waals_radii                 | file           |  "EDAM_data: Amino acid van der Waals data"                  | Van der waals radii
+vector                              | file           |  "EDAM_data: vectorstrip cloning vector definition record"   | Cloning vector definition
+vienna_alignment                    | file           |  "EDAM_data: RNA secondary structure alignment data"         | Vienna RNA alignment
+vienna_dotplot                      | file           |  "EDAM_data: Vienna base pairing probability matrix dotplot" | Vienna dotplot postscript
+vienna_postscript_alignment         | file           |  "EDAM_data: Sequence alignment image"                       | Vienna RNA alignment postscript
+vienna_structure                    | file           |  "EDAM_data: RNA secondary structure image"                  | Vienna RNA structure postscript
+weights                             | properties     |  "EDAM_data: Phylogenetic character weights"                 | Phylip weights
+white_wimley_datafile               | file           |  "EDAM_data: Amino acid White-Wimley data"                   | White-Wimley data
+wildcard_string                     | string         |  "EDAM_data: Wildcard string"                                | string with wildcard characters
+wordfinder_error                    | file           |  "EDAM_data: EMBOSS wordfinder log file"                     | Program wordfinder errors
+wordmatch_log                       | file           |  "EDAM_data: EMBOSS wordmatch log file"                      | Wordmatch log
+xml                                 | file           |                                                         | XML file
