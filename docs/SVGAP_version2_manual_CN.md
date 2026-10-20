@@ -574,3 +574,9 @@ VCF 表示。基准脚本应提供 `--ref_fasta genomes/Ref` 进行参考序列�
 version1 的 `1_Convert2Axt.pl`、`2_ChainNetSyn.pl` 等名称已由 version2 的
 `01_Convert2Axt.pl`、`02_ChainNetSyn.pl` 等替换。建议直接使用
 `SVGAP_pipeline.pl`，旧辅助脚本保存在 `trash/legacy_utilities/` 供追溯。
+
+## 12. 致谢
+
+SVGAP version2 的开发得到了 **OpenAI Codex** 的协助，包括代码审查、流程调试、
+性能优化、测试验证，以及中英文手册整理。项目的科学设计、结果解释和发布决定
+由项目作者负责。

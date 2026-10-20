@@ -596,3 +596,11 @@ version1 names such as `1_Convert2Axt.pl` and `2_ChainNetSyn.pl` were replaced b
 version2 names such as `01_Convert2Axt.pl` and `02_ChainNetSyn.pl`. Prefer the
 top-level `SVGAP_pipeline.pl`. Retained legacy utilities are under
 `trash/legacy_utilities/` for reference.
+
+## 12. Acknowledgments
+
+Development of SVGAP version2 was assisted by **OpenAI Codex**, including code
+review, workflow debugging, performance optimization, validation, and
+preparation of the Chinese and English manuals. Scientific design, result
+interpretation, and release decisions remain the responsibility of the project
+authors.
