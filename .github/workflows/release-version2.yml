@@ -1,0 +1,54 @@
+name: Publish version2 release
+
+on:
+  push:
+    tags:
+      - version2
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out tagged source
+        uses: actions/checkout@v4
+
+      - name: Build reproducible source package
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir dist
+          git archive \
+            --format=tar.gz \
+            --prefix=SVGAP-version2/ \
+            --output=dist/SVGAP_version2_20261020.tar.gz \
+            "$GITHUB_SHA"
+          cd dist
+          sha256sum SVGAP_version2_20261020.tar.gz \
+            > SVGAP_version2_20261020.tar.gz.sha256
+
+      - name: Create or update GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release edit "$RELEASE_TAG" \
+              --title "SVGAP version2" \
+              --notes-file RELEASE_NOTES_version2.md
+            gh release upload "$RELEASE_TAG" \
+              dist/SVGAP_version2_20261020.tar.gz \
+              dist/SVGAP_version2_20261020.tar.gz.sha256 \
+              --clobber
+          else
+            gh release create "$RELEASE_TAG" \
+              dist/SVGAP_version2_20261020.tar.gz \
+              dist/SVGAP_version2_20261020.tar.gz.sha256 \
+              --verify-tag \
+              --title "SVGAP version2" \
+              --notes-file RELEASE_NOTES_version2.md
+          fi
