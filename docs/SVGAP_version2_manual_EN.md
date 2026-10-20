@@ -122,10 +122,16 @@ the reciprocal alignment options.
 Create one alignment per query:
 
 ```bash
-minimap2 -t 16 -x asm5 -c --cs=long \
+minimap2 -t 16 -x asm5 -c --cs=long --mask-level 1 \
   genomes/Ref genomes/Sample01 \
   > alignments/RefvsSample01.chr.paf
 ```
+
+`--mask-level 1` retains local reverse-strand chains that overlap the primary
+chain. Minimap2's default value of `0.5` can suppress true inversions when
+nearby variants compete for the same interval, causing both event and carrier
+false negatives. This option can modestly increase PAF size and chaining time;
+omit it when maximum speed matters and inversion sensitivity does not.
 
 Run SVGAP:
 
@@ -219,7 +225,12 @@ use:
 --filter_toplen N
 --filter_nonsynlen N
 --filter_synlen N
+--filter_invlen N
 ```
+
+`--filter_invlen` now controls both SynNet filtering and the PairwiseSV
+inversion call floor. The version2 default is `1000` bp. The former 10 kb floor
+discarded inversions between 1 and 10 kb.
 
 Adaptive controls are:
 
@@ -281,6 +292,9 @@ identifies records with reference-base, coordinate, or allele-length problems.
 5. PairwiseSV staging uses hard links on the same filesystem and falls back to copying.
 6. INS genotyping is commonly the slowest remaining version2 stage. Parallelism
    across queries usually helps more than extra threads within one sample.
+7. Inversion-sensitive mode uses Minimap2 `--mask-level 1` and the default
+   `--filter_invlen 1000`. For maximum speed when only inversions above 10 kb
+   matter, omit `--mask-level 1` upstream and set `--filter_invlen 10000`.
 
 ## 11. Troubleshooting
 
@@ -302,6 +316,16 @@ Check `SVGAP_pipeline.log` for `Skip because file has no data records`.
 
 Install the htslib `bgzip` and `tabix` programs, or provide their paths with
 `--bgzip` and `--tabix`. The plain-text VCF remains available.
+
+### INV recall or large-SV genotype F1 is low
+
+Confirm that PAF was generated with `--mask-level 1`, then check the pipeline
+log to ensure that SynNetFilter and PairwiseSV both received `--invlen 1000`.
+If the only discrepancy is one insertion FP plus one FN with identical inserted
+sequence and a position shift equal to the repeat unit, the records can be
+equivalent tandem-repeat VCF representations. Pass `--ref_fasta genomes/Ref`
+to the benchmark tool for reference-aware normalization, and retain the strict
+coordinate result to distinguish representation differences from genotype errors.
 
 ### Commands using version1 script names fail
 

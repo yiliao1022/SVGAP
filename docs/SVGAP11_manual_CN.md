@@ -428,7 +428,7 @@ perl 03_SynNetFilter.pl \
 | `--toplen` | top syntenic fill 最小长度，默认 500000。|
 | `--nonsynlen` | 下层 nonSyn fill 最小长度，默认 500000。|
 | `--synlen` | 下层 syn fill 最小长度，默认 500000。|
-| `--invlen` | inversion fill 最小长度，默认 10000。|
+| `--invlen` | inversion fill 最小长度，默认 1000。|
 | `--alrate` | 最小 alignment/fill length 比例，默认 0.10。|
 | `--qFarCutoff` | inversion fill 的最大 qFar，默认 5000000。|
 | `--minscore` | 最低分数阈值。|

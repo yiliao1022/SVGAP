@@ -405,7 +405,7 @@ perl 03_SynNetFilter.pl \
 | `--toplen` | Minimum length for top syntenic fills. Default: 500000. |
 | `--nonsynlen` | Minimum length for lower nonSyn fills. Default: 500000. |
 | `--synlen` | Minimum length for lower syn fills. Default: 500000. |
-| `--invlen` | Minimum length for inversion fills. Default: 10000. |
+| `--invlen` | Minimum length for inversion fills. Default: 1000. |
 | `--alrate` | Minimum alignment/fill-length proportion. Default: 0.10. |
 | `--qFarCutoff` | Maximum qFar for inversion fills. Default: 5000000. |
 | `--minscore` | Minimum score threshold. |

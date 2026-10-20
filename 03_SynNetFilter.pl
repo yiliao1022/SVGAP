@@ -75,7 +75,7 @@ my %opt = (
     toplen      => 500000,
     nonsynlen   => 500000,
     synlen      => 500000,
-    invlen      => 10000,
+    invlen      => 1000,
     alrate      => 0.10,
     qFarCutoff  => 5000000,
     adaptive_thresholds => 1,
@@ -766,7 +766,7 @@ Filtering thresholds:
   --toplen       Minimum length for top syntenic fills       [500000]
   --nonsynlen    Minimum length for lower nonSyn fills       [500000]
   --synlen       Minimum length for lower syn fills          [500000]
-  --invlen       Minimum length for inversion fills          [10000]
+  --invlen       Minimum length for inversion fills          [1000]
   --alrate       Minimum ali/fill_length proportion          [0.10]
   --qFarCutoff   Maximum qFar for accepting inv fills        [5000000]
   --adaptive_thresholds / --no-adaptive_thresholds

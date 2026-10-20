@@ -96,7 +96,7 @@ if ($help || (!defined $synnet && !defined $syndir)) {
 
 $outdir       ||= ".";
 $threads      ||= 4;
-$invlen       ||= 10000;
+$invlen       ||= 1000;
 $cnvlen       ||= 500;
 $dellen       ||= 20000;
 $inslen       ||= $dellen;
@@ -228,7 +228,7 @@ Optional:
   --seq_context <int>   flanking sequence length [default: 20]
   --max_full_seq <int>  max SV length for full sequence extraction [default: 1000000]
   --edge_seq_len <int>  for very large SVs, output left/right edges of this length [default: 500]
-  --invlen <int>        minimum inversion size [default: 10000]
+  --invlen <int>        minimum inversion size [default: 1000]
   --cnvlen <int>        minimum CNV/tandem-duplication-like event size [default: 500]
   --dellen <int>        maximum deletion size to keep as simple DEL [default: 20000]
   --inslen <int>        maximum insertion size to keep as simple INS [default: same as dellen]

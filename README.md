@@ -35,6 +35,10 @@ perl SVGAP_pipeline.pl \
 The pipeline accepts Minimap2 PAF, MUMmer delta, MAF, or existing AXT input.
 Run `perl SVGAP_pipeline.pl --help` for all modes and options.
 
+For inversion-sensitive Minimap2 input, create PAF with
+`-x asm5 -c --cs=long --mask-level 1`. SVGAP uses a 1 kb inversion floor by
+default and applies it consistently in SynNet filtering and PairwiseSV calling.
+
 Main outputs are written under `SVGAP_run/08_vcf/`:
 
 - `All.largeSV.raw.vcf`

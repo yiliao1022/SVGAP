@@ -51,6 +51,7 @@ use POSIX qw(strftime);
 my %opt = (
     out               => 'SVGAP_vs_truth',
     samples           => '',
+    ref_fasta         => '',
     pred              => [],
     large_vcf         => [],
     small_vcf         => [],
@@ -85,6 +86,7 @@ GetOptions(
     'samples=s'          => \$opt{samples},
     'query_list=s'       => \$opt{samples},
     'glist=s'            => \$opt{samples},
+    'ref_fasta|ref=s'    => \$opt{ref_fasta},
 
     'large_min_len=i'    => \$opt{large_min_len},
     'small_max_len=i'    => \$opt{small_max_len},
@@ -114,6 +116,13 @@ die "ERROR: truth VCF does not exist: $opt{truth}\n" unless -s $opt{truth};
 for my $e (@evals) {
     die "ERROR: prediction VCF does not exist for $e->{label}: $e->{file}\n" unless -s $e->{file};
 }
+
+my $ref_sequences = {};
+if ($opt{ref_fasta}) {
+    die "ERROR: reference FASTA does not exist: $opt{ref_fasta}\n" unless -s $opt{ref_fasta};
+    $ref_sequences = read_fasta($opt{ref_fasta});
+}
+$opt{ref_sequences} = $ref_sequences;
 
 my $outdir = dirname_of_prefix($opt{out});
 make_path($outdir) if $outdir ne '' && !-d $outdir;
@@ -218,6 +227,8 @@ Options:
   --pred LABEL:CLASS:FILE  generic prediction VCF input; can be repeated
   --samples FILE           sample/query list, one name per line; fixes order
   --glist FILE             alias of --samples
+  --ref_fasta FILE         reference FASTA; enables repeat-aware matching of
+                           equivalent insertion placements
   --out PREFIX             output prefix [SVGAP_vs_truth]
 
 Thresholds:
@@ -744,7 +755,6 @@ sub match_small_indel {
 
 sub match_insertion {
     my ($t, $p, $opt) = @_;
-    return 0 if abs($t->{pos} - $p->{pos}) > $opt->{ins_tol};
     my $len1 = max2(1, $t->{len});
     my $len2 = max2(1, $p->{len});
     my $ratio = ratio2($len1, $len2);
@@ -753,6 +763,12 @@ sub match_insertion {
     # If both exact inserted alleles are available, reward exact sequence match.
     my $ti = inserted_sequence($t);
     my $pi = inserted_sequence($p);
+    if (is_real_seq($ti) && is_real_seq($pi)
+        && repeat_equivalent_insertions($t, $p, $ti, $pi, $opt->{ref_sequences})) {
+        return 1.0;
+    }
+
+    return 0 if abs($t->{pos} - $p->{pos}) > $opt->{ins_tol};
     if (is_real_seq($ti) && is_real_seq($pi)) {
         return 1.0 if $ti eq $pi;
         return 0.8 if kmer_similarity($ti, $pi, 10) >= 0.50;
@@ -760,6 +776,27 @@ sub match_insertion {
     my $dist_score = 1 - (abs($t->{pos} - $p->{pos}) / max2(1, $opt->{ins_tol}));
     my $len_score  = 1 / $ratio;
     return 0.50 + 0.49 * (($dist_score + $len_score) / 2);
+}
+
+sub repeat_equivalent_insertions {
+    my ($a, $b, $ains, $bins, $refs) = @_;
+    return 0 unless $refs && ref($refs) eq 'HASH';
+    return 0 unless defined $a->{chr} && $a->{chr} eq ($b->{chr} || '');
+    my $ref = $refs->{$a->{chr}};
+    return 0 unless defined $ref;
+
+    return $ains eq $bins ? 1 : 0 if $a->{pos} == $b->{pos};
+
+    my ($left, $right, $left_ins, $right_ins) = $a->{pos} < $b->{pos}
+        ? ($a->{pos}, $b->{pos}, $ains, $bins)
+        : ($b->{pos}, $a->{pos}, $bins, $ains);
+    my $distance = $right - $left;
+    return 0 if $left < 1 || $right > length($ref) || $distance <= 0;
+
+    # VCF POS anchors the base before the insertion. Shifting across a repeat
+    # preserves the local haplotype when these two strings are identical.
+    my $between = substr($ref, $left, $distance);
+    return ($left_ins . $between) eq ($between . $right_ins) ? 1 : 0;
 }
 
 sub match_interval_sv {
@@ -872,6 +909,29 @@ sub fmt {
 ################################################################################
 # Utility
 ################################################################################
+sub read_fasta {
+    my ($file) = @_;
+    my $fh;
+    if ($file =~ /\.gz$/) {
+        open($fh, '-|', 'gzip', '-dc', '--', $file) or die "ERROR: cannot read $file: $!\n";
+    } else {
+        open($fh, '<', $file) or die "ERROR: cannot read $file: $!\n";
+    }
+    my (%seq, $name);
+    while (my $line = <$fh>) {
+        chomp $line;
+        if ($line =~ /^>(\S+)/) {
+            $name = $1;
+            $seq{$name} ||= '';
+        } elsif (defined $name) {
+            $line =~ s/\s+//g;
+            $seq{$name} .= uc($line);
+        }
+    }
+    close $fh;
+    return \%seq;
+}
+
 sub dirname_of_path {
     my ($p) = @_;
     $p =~ s{/[^/]+$}{};

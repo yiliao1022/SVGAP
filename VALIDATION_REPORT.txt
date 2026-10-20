@@ -27,3 +27,15 @@ Date: 2026-07-07
   workers. Large-SV event F1 is 0.941176; small-InDel and SNP event F1 are 1.0.
 - Final All.SV.vg.vcf (85 records) and All.SVGAP.vg.vcf (125 records) pass
   reference validation with zero errors and zero warnings.
+
+2026-10-20 large-SV accuracy update:
+- Minimap2 --mask-level 1 plus a shared 1-kb inversion floor recovered all four
+  truth inversions without adding inversion false positives.
+- Strict-coordinate large-SV event F1 is 0.977273 and genotype F1 is 0.985714.
+- Reference-aware repeat-equivalent matching gives event F1 1.0 and genotype
+  F1 1.0: 44/44 events and 70/70 carrier genotypes.
+- The non-carrier at the first inversion is explicitly genotyped `0|0`; no INV
+  genotype is missing in the accuracy-oriented run.
+- The full accuracy-oriented run completed in 20.101 seconds with two workers.
+- Final All.SV.vg.vcf (88 records) and All.SVGAP.vg.vcf (128 records) pass
+  reference validation with zero errors and zero warnings.

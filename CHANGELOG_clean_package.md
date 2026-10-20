@@ -54,3 +54,24 @@ See `trash/MANIFEST_trash.txt` for details.
 7. Reduced SNP MAF scanning overhead and switched independent job queues to core Perl `fork()/wait()`.
 8. Hard-link filtered SynNet inputs into PairwiseSV staging when possible, with copy fallback.
 9. Added short-contig, skip-filter, no-variant, truth-set accuracy, and vg-ready validation regressions.
+
+## 2026-10-20: large-SV genotype accuracy revision
+
+1. Lowered the inversion floor from 10 kb to 1 kb in SynNetFilter, PairwiseSV,
+   and the pipeline controller.
+2. The controller now passes one `--filter_invlen` value to both filtering and
+   PairwiseSV, preventing a candidate retained by one stage from being silently
+   discarded by the next.
+3. Documented Minimap2 `--mask-level 1` for inversion-sensitive assembly
+   alignments. This retains local reverse chains that the default overlap mask
+   can suppress.
+4. Added reference-aware repeat-equivalent insertion matching to the benchmark
+   tool. Equivalent tandem-repeat placements no longer count as one false
+   positive plus one false negative.
+5. Fixed INV genotyping of the first MAF alignment block when it shares a
+   paragraph with the MAF header; reference samples near a chromosome start now
+   receive `0|0` instead of `.|.` when evidence is sufficient.
+6. On the two-sample simulated truth set, large-SV event and carrier-genotype
+   F1 both increased to 1.000 (44/44 events and 70/70 carrier genotypes), with
+   zero extra inversion candidates. The full pipeline took 20.1 seconds versus
+   18.5 seconds for the faster, lower-sensitivity alignment.

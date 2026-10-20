@@ -429,7 +429,9 @@ sub genotype_one_query {
     my $fh = open_maybe_gz($maf);
     local $/ = "\n\n";
     while (my $block = <$fh>) {
-        next if $block =~ /^\s*#/;
+        # A MAF header is commonly followed immediately by the first alignment
+        # block.  Do not discard that block merely because the paragraph starts
+        # with a comment/header line; selecting s-lines already ignores headers.
         my @s = grep { /^s\s+/ } split(/\n/, $block);
         next unless @s >= 2;
         my $t = parse_maf_sline($s[0]);

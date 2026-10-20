@@ -86,7 +86,10 @@ my %opt = (
     filter_toplen => 500_000,
     filter_nonsynlen => 500_000,
     filter_synlen => 500_000,
-    filter_invlen => 10_000,
+    # A 10 kb floor misses many well-aligned assembly inversions.  Keep 1 kb as
+    # the conservative default and pass the same floor to both filtering and
+    # PairwiseSV so the two stages cannot silently disagree.
+    filter_invlen => 1_000,
     filter_alrate => 0.10,
     filter_qfar_cutoff => 5_000_000,
     filter_adaptive => 1,
@@ -266,17 +269,17 @@ if (!$opt{skip_pairwise_sv}) {
 
     if ($reciprocal_strategy eq 'qnet') {
         my $fwd_all = prepare_synnet_subset($pair_syn_fwd, "$pair_input_root/forward_tnet_qnet", 'all', $LOG, $opt{dry_run});
-        run_cmd($LOG, $opt{dry_run}, "perl '$Bin/04_PairwiseSV.pl' --syndir '$fwd_all' --outdir '$pairsv' --gd '$opt{genome_dir}' --threads $opt{threads} --seq --exact_seq_len");
+        run_cmd($LOG, $opt{dry_run}, "perl '$Bin/04_PairwiseSV.pl' --syndir '$fwd_all' --outdir '$pairsv' --gd '$opt{genome_dir}' --threads $opt{threads} --invlen $opt{filter_invlen} --seq --exact_seq_len");
     } elsif ($reciprocal_strategy eq 'true') {
         my $fwd_tnet = prepare_synnet_subset($pair_syn_fwd, "$pair_input_root/forward_tnet_only", 'tnet', $LOG, $opt{dry_run});
         my $rec_tnet = prepare_synnet_subset($pair_syn_rec, "$pair_input_root/reciprocal_tnet_only", 'tnet', $LOG, $opt{dry_run});
-        run_cmd($LOG, $opt{dry_run}, "perl '$Bin/04_PairwiseSV.pl' --syndir '$fwd_tnet' --outdir '$pairsv' --gd '$opt{genome_dir}' --threads $opt{threads} --seq --exact_seq_len");
-        run_cmd($LOG, $opt{dry_run}, "perl '$Bin/04_PairwiseSV.pl' --syndir '$rec_tnet' --outdir '$pairsv' --gd '$opt{genome_dir}' --threads $opt{threads} --seq --exact_seq_len");
+        run_cmd($LOG, $opt{dry_run}, "perl '$Bin/04_PairwiseSV.pl' --syndir '$fwd_tnet' --outdir '$pairsv' --gd '$opt{genome_dir}' --threads $opt{threads} --invlen $opt{filter_invlen} --seq --exact_seq_len");
+        run_cmd($LOG, $opt{dry_run}, "perl '$Bin/04_PairwiseSV.pl' --syndir '$rec_tnet' --outdir '$pairsv' --gd '$opt{genome_dir}' --threads $opt{threads} --invlen $opt{filter_invlen} --seq --exact_seq_len");
     } elsif ($reciprocal_strategy eq 'both') {
         my $fwd_all = prepare_synnet_subset($pair_syn_fwd, "$pair_input_root/forward_tnet_qnet", 'all', $LOG, $opt{dry_run});
         my $rec_all = prepare_synnet_subset($pair_syn_rec, "$pair_input_root/reciprocal_tnet_qnet", 'all', $LOG, $opt{dry_run});
-        run_cmd($LOG, $opt{dry_run}, "perl '$Bin/04_PairwiseSV.pl' --syndir '$fwd_all' --outdir '$pairsv' --gd '$opt{genome_dir}' --threads $opt{threads} --seq --exact_seq_len");
-        run_cmd($LOG, $opt{dry_run}, "perl '$Bin/04_PairwiseSV.pl' --syndir '$rec_all' --outdir '$pairsv' --gd '$opt{genome_dir}' --threads $opt{threads} --seq --exact_seq_len");
+        run_cmd($LOG, $opt{dry_run}, "perl '$Bin/04_PairwiseSV.pl' --syndir '$fwd_all' --outdir '$pairsv' --gd '$opt{genome_dir}' --threads $opt{threads} --invlen $opt{filter_invlen} --seq --exact_seq_len");
+        run_cmd($LOG, $opt{dry_run}, "perl '$Bin/04_PairwiseSV.pl' --syndir '$rec_all' --outdir '$pairsv' --gd '$opt{genome_dir}' --threads $opt{threads} --invlen $opt{filter_invlen} --seq --exact_seq_len");
     } else {
         die "ERROR: internal error: unknown reciprocal_strategy $reciprocal_strategy\n";
     }
@@ -790,7 +793,7 @@ SynNet filtering options:
   --filter_toplen N            Top-level fill threshold ceiling [500000].
   --filter_nonsynlen N         Lower non-syntenic fill threshold ceiling [500000].
   --filter_synlen N            Lower syntenic fill threshold ceiling [500000].
-  --filter_invlen N            Minimum inversion fill length [10000].
+  --filter_invlen N            Minimum inversion fill/call length [1000].
   --filter_alrate FLOAT        Minimum aligned fraction [0.10].
   --filter_qfar_cutoff N       Maximum qFar for inversion fills [5000000].
   --filter_adaptive / --no-filter_adaptive

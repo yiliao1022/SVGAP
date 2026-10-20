@@ -123,10 +123,15 @@ query-vs-reference 比对，可通过 reciprocal 参数提供。
 先对每个 query 运行比对：
 
 ```bash
-minimap2 -t 16 -x asm5 -c --cs=long \
+minimap2 -t 16 -x asm5 -c --cs=long --mask-level 1 \
   genomes/Ref genomes/Sample01 \
   > alignments/RefvsSample01.chr.paf
 ```
+
+`--mask-level 1` 会保留被同一主链覆盖区域中的局部反向链。默认的 `0.5`
+在相邻变异较多时可能压掉真实倒位，从而使倒位事件和携带者同时漏检。
+它会稍微增加 PAF 大小和后续 chain 时间；如果只追求最快运行且不关注倒位，
+可省略该参数。
 
 再运行完整流程：
 
@@ -219,7 +224,11 @@ SVGAP_version2_run/
 --filter_toplen N
 --filter_nonsynlen N
 --filter_synlen N
+--filter_invlen N
 ```
+
+`--filter_invlen` 同时控制 SynNet 过滤和 PairwiseSV 倒位调用，version2 默认
+为 `1000` bp。旧的 10 kb 门槛会直接漏掉 1–10 kb 的倒位。
 
 自适应参数：
 
@@ -279,6 +288,9 @@ perl 14_validate_vg_vcf.pl \
 5. PairwiseSV staging 在同一文件系统内使用硬链接，跨文件系统时自动复制。
 6. INS 分型通常是 version2 后半段最慢的步骤；增加 query 级并行比提高单个
    样本内部线程更有效。
+7. 倒位敏感模式使用 Minimap2 `--mask-level 1` 和默认的
+   `--filter_invlen 1000`。若速度优先且只分析大于 10 kb 的倒位，可在上游
+   省略 `--mask-level 1`，并设置 `--filter_invlen 10000`。
 
 ## 11. 常见问题
 
@@ -300,6 +312,14 @@ perl 14_validate_vg_vcf.pl \
 
 安装 htslib 的 `bgzip` 和 `tabix`，或通过 `--bgzip`、`--tabix` 指定路径。
 纯文本 VCF 仍会保留。
+
+### INV recall 或大 SV genotype F1 偏低
+
+先确认 PAF 使用 `--mask-level 1` 生成，并在日志中确认 SynNetFilter 与
+PairwiseSV 都收到相同的 `--invlen 1000`。若只有一个插入 FP 和一个 FN，且
+两者序列相同、位置差等于重复单元长度，这通常是 tandem repeat 中的等价
+VCF 表示。基准脚本应提供 `--ref_fasta genomes/Ref` 进行参考序列归一化；
+同时保留严格坐标结果，便于区分表示差异与真正的基因型错误。
 
 ### 旧命令中的脚本名失效
 
