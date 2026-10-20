@@ -120,6 +120,43 @@ version2 可以利用单次 forward alignment 产生的 tnet 和 qnet，不要�
 reciprocal alignment。简单交换 forward 文件坐标不能产生独立比对。真正独立
 运行的 query-vs-reference MAF/AXT 可以通过 reciprocal 参数提供。
 
+### 4.4 已有 aligner 输出如何交给 SVGAP
+
+每个非参考样本准备一个 pairwise alignment 文件，并放在同一个目录。例如：
+
+```text
+alignments/
+  RefvsSample01.chr.paf
+  RefvsSample02.chr.paf
+```
+
+将 `.paf` 换成对应 aligner 的 `.maf` 或 `.delta` 即可。文件名左侧必须是
+`--refname`，右侧必须是 `g.list` 中的 query ID。一次 pipeline run 应使用同一种
+aligner/格式；若不同样本来自不同 aligner，先分别转换为 AXT，再统一从
+`--start_from axt` 开始。
+
+第 5.1–5.5 节给出了各 aligner 的完整 pipeline 命令。若只想先检查格式转换，
+也可以单独运行：
+
+```bash
+perl 01_Convert2Axt.pl \
+  --ali anchorwave \
+  --input alignments \
+  --wk axt_check \
+  --tname Ref \
+  --qname Query \
+  --t 8
+```
+
+把 `anchorwave` 换成 `minimap2`、`last`、`lastz`、`mummer4` 或 `maf`。
+转换成功后，每个 query 都应有非空文件：
+
+```text
+axt_check/Target_Ref/RefvsSample01.axt
+```
+
+正常完整运行不需要先执行此检查；`SVGAP_pipeline.pl` 会自动完成相同转换。
+
 ## 5. 推荐运行方法
 
 ### 5.1 从 Minimap2 PAF 开始
@@ -276,9 +313,12 @@ perl SVGAP_pipeline.pl \
   --threads 16
 ```
 
-### 5.8 Split-contig alignment
+### 5.8 Split-contig alignment 完整流程
 
-先切分 query：
+split-contig 模式适合单条 chromosome 很长、aligner 内存压力较大，或者需要按块
+并行生成 alignment 的情况。只切分 query，reference 仍使用完整 FASTA。
+
+第一步，切分每个 query：
 
 ```bash
 perl 01_Convert2Axt.pl \
@@ -288,8 +328,32 @@ perl 01_Convert2Axt.pl \
   --slide 10000
 ```
 
-对 `split/Sample01/Sample01.subcontigs.fa` 进行比对，输出文件名使用 `.ctg`，
-例如 `RefvsSample01.ctg.paf`。主流程会把 subcontig 坐标恢复到原始染色体：
+该命令生成三个文件：
+
+```text
+split/Sample01/Sample01.subcontigs.fa     # 用于比对的 query 子序列
+split/Sample01/Sample01.sizes             # 原始 chromosome 长度
+split/Sample01/Sample01.subcontigs.map.tsv # 子序列到原 chromosome 的映射
+```
+
+不要修改 `subcontigs.fa` 的 sequence ID。ID 末尾的 `_start_end` 是恢复原始坐标
+所需的信息。
+
+第二步，用所选 aligner 将完整 reference 与 split query 比对。Minimap2 示例：
+
+```bash
+minimap2 -t 16 -x asm5 -c --cs=long --mask-level 1 \
+  genomes/Ref split/Sample01/Sample01.subcontigs.fa \
+  > alignments/RefvsSample01.ctg.paf
+```
+
+其他 aligner 使用相同命名规则：LAST、LASTZ、AnchorWave 或通用 MAF 输出命名为
+`RefvsSample01.ctg.maf`，MUMmer4 输出命名为
+`RefvsSample01.ctg.delta`。alignment 中的 query source ID 必须保留
+`Sample01.chr01_1_10010000` 这样的 split ID。
+
+第三步，运行主流程并提供对应的 `.sizes` 文件。主流程在转换 AXT 前把所有 query
+坐标恢复到原始 chromosome：
 
 ```bash
 perl SVGAP_pipeline.pl \
@@ -305,8 +369,20 @@ perl SVGAP_pipeline.pl \
   --threads 16
 ```
 
-`--align_sizes` 可以重复。若 `.sizes` 文件放在 alignment 目录，转换器也会
-自动发现；显式提供更容易复现。
+多个 query 时，对每个样本重复切分和比对，并重复提供参数：
+
+```bash
+--align_sizes split/Sample01/Sample01.sizes \
+--align_sizes split/Sample02/Sample02.sizes
+```
+
+`.ctg` 文件名会让默认的 `--align_mode auto` 自动识别 split-contig 输入，但建议
+显式写 `--align_mode ctg`。若 `.sizes` 文件放在 alignment 目录，转换器也会自动
+发现；显式提供更容易复现。不要给 Sample01 使用 Sample02 的 sizes 文件。
+
+转换后检查 `01_axt/Target_Ref/RefvsSample01.axt`。其中 query sequence 名应恢复为
+`Sample01.chr01`，不能再含 `_start_end` 后缀。后续 chain/net、SV calling 和
+genotyping 与普通 chromosome alignment 完全相同。
 
 ### 5.9 Forward 与 reciprocal alignment
 

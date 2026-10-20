@@ -123,6 +123,45 @@ use the forward-only path. Swapping coordinates in a forward file does not
 create an independent reciprocal alignment. Truly independent query-vs-reference
 MAF or AXT can be supplied through the reciprocal options.
 
+### 4.4 Supplying existing aligner output to SVGAP
+
+Place one pairwise alignment file per non-reference sample in one directory:
+
+```text
+alignments/
+  RefvsSample01.chr.paf
+  RefvsSample02.chr.paf
+```
+
+Replace `.paf` with `.maf` or `.delta` for the selected aligner. The left side
+of each file name must equal `--refname`; the right side must equal a query ID
+in `g.list`. Use one aligner/input format per pipeline run. If samples were
+aligned with different programs, convert each group to AXT first and then start
+the combined run with `--start_from axt`.
+
+Sections 5.1–5.5 show complete pipeline commands for each aligner. To check
+only the input conversion first, run:
+
+```bash
+perl 01_Convert2Axt.pl \
+  --ali anchorwave \
+  --input alignments \
+  --wk axt_check \
+  --tname Ref \
+  --qname Query \
+  --t 8
+```
+
+Replace `anchorwave` with `minimap2`, `last`, `lastz`, `mummer4`, or `maf`.
+Successful conversion creates one non-empty file per query, for example:
+
+```text
+axt_check/Target_Ref/RefvsSample01.axt
+```
+
+This separate check is optional. `SVGAP_pipeline.pl` performs the same
+conversion automatically during a normal full run.
+
 ## 5. Recommended commands
 
 ### 5.1 Start from Minimap2 PAF
@@ -282,9 +321,13 @@ perl SVGAP_pipeline.pl \
   --threads 16
 ```
 
-### 5.8 Split-contig alignment
+### 5.8 Complete split-contig workflow
 
-Split a query first:
+Split-contig mode is useful when very long chromosomes create excessive
+aligner memory use or when alignment must be generated in chunks. Split only
+the query; continue to use the complete reference FASTA.
+
+First, split each query:
 
 ```bash
 perl 01_Convert2Axt.pl \
@@ -294,9 +337,32 @@ perl 01_Convert2Axt.pl \
   --slide 10000
 ```
 
-Align `split/Sample01/Sample01.subcontigs.fa` and use `.ctg` in the result name,
-for example `RefvsSample01.ctg.paf`. The controller restores original chromosome
-coordinates with:
+This writes three files:
+
+```text
+split/Sample01/Sample01.subcontigs.fa      # query chunks used for alignment
+split/Sample01/Sample01.sizes              # original chromosome lengths
+split/Sample01/Sample01.subcontigs.map.tsv # chunk-to-chromosome map
+```
+
+Do not edit sequence IDs in `subcontigs.fa`. Their `_start_end` suffix carries
+the coordinates required for restoration.
+
+Second, align the complete reference against the split query. For Minimap2:
+
+```bash
+minimap2 -t 16 -x asm5 -c --cs=long --mask-level 1 \
+  genomes/Ref split/Sample01/Sample01.subcontigs.fa \
+  > alignments/RefvsSample01.ctg.paf
+```
+
+Use the same naming rule with other aligners: name LAST, LASTZ, AnchorWave, or
+generic MAF output `RefvsSample01.ctg.maf`, and name MUMmer4 output
+`RefvsSample01.ctg.delta`. Query source IDs in the alignment must retain split
+IDs such as `Sample01.chr01_1_10010000`.
+
+Third, run the controller with the matching `.sizes` file. Coordinates are
+restored to the original query chromosome before AXT conversion:
 
 ```bash
 perl SVGAP_pipeline.pl \
@@ -312,8 +378,22 @@ perl SVGAP_pipeline.pl \
   --threads 16
 ```
 
-`--align_sizes` is repeatable. The converter can discover `.sizes` files in the
-alignment directory, but explicit paths make the run easier to reproduce.
+For multiple queries, split and align each sample and repeat the option:
+
+```bash
+--align_sizes split/Sample01/Sample01.sizes \
+--align_sizes split/Sample02/Sample02.sizes
+```
+
+The `.ctg` file name lets the default `--align_mode auto` detect split-contig
+input, but explicit `--align_mode ctg` is recommended. The converter can also
+discover `.sizes` files placed in the alignment directory; explicit paths make
+the run easier to reproduce. Never use one sample's sizes file for another.
+
+After conversion, inspect `01_axt/Target_Ref/RefvsSample01.axt`. Query sequence
+names should be restored to names such as `Sample01.chr01` and must no longer
+contain `_start_end`. Downstream chain/net, SV calling, and genotyping are then
+identical to the normal chromosome-alignment workflow.
 
 ### 5.9 Forward and reciprocal alignment
 
