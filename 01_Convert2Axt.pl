@@ -99,6 +99,9 @@ GetOptions(
     'help|h'       => \$opt{help},
 ) or die usage();
 
+$opt{ali} = lc($opt{ali} || '');
+$opt{mode} = lc($opt{mode} || 'auto');
+
 if ($opt{help}) {
     print usage();
     exit 0;
@@ -156,8 +159,8 @@ sub validate_options {
     die "ERROR: --slide must be smaller than --bin.\n" if $opt->{slide} >= $opt->{bin};
 
     if ($opt->{ali}) {
-        die "ERROR: --ali must be one of last, lastz, maf, mummer, minimap2 or anchorwave.\n"
-            unless $opt->{ali} =~ /^(last|lastz|maf|mummer|minimap2|anchorwave)$/;
+        die "ERROR: --ali must be one of last, lastz, maf, mummer/mummer4, minimap2 or anchorwave.\n"
+            unless $opt->{ali} =~ /^(last|lastz|maf|mummer|mummer4|minimap2|anchorwave)$/;
     }
 }
 
@@ -211,7 +214,7 @@ Usage 3. Convert alignments generated from split query subcontigs:
       RefvsQue.ctg.maf       for LAST ctg mode
 
 Main options:
-  --ali        [last|lastz|maf|mummer|minimap2|anchorwave]
+  --ali        [last|lastz|maf|mummer|mummer4|minimap2|anchorwave]
   --input      folder containing alignment files
   --wk         output / working folder
   --mode       auto|chr|ctg. Default: auto. If no suffix is detected, chr is used.
@@ -354,7 +357,7 @@ sub collect_alignment_jobs {
             if ($file =~ /^(.+?)vs(.+?)(?:\.(chr|ctg))?\.maf$/) {
                 ($t, $q, $suffix_mode) = ($1, $2, $3);
             } else { next; }
-        } elsif ($opt->{ali} eq 'mummer') {
+        } elsif ($opt->{ali} eq 'mummer' || $opt->{ali} eq 'mummer4') {
             if ($file =~ /^(.+?)vs(.+?)(?:\.(chr|ctg))?\.delta$/) {
                 ($t, $q, $suffix_mode) = ($1, $2, $3);
             } else { next; }
@@ -440,7 +443,7 @@ sub convert_one_alignment {
         make_query_reference_axt($maf_for_axt, $t, $q, $target_q_dir, $opt) if $opt->{query};
         cleanup($opt, $sorted_paf, $raw_maf, ($opt->{emit_variants} ? $var_out : ()), ($maf_for_axt ne $raw_maf ? $maf_for_axt : ())) ;
 
-    } elsif ($ali eq 'mummer') {
+    } elsif ($ali eq 'mummer' || $ali eq 'mummer4') {
         my $raw_maf = "$opt->{wk}/$prefix.sorted.maf";
         run_cmd(shq(exec_path($opt->{mum320}, 'delta2maf')) . " -r " . shq($job->{path}) . " > " . shq($raw_maf));
         my $maf_for_axt = prepare_maf_for_mode($raw_maf, $mode, $sizes);
@@ -558,12 +561,11 @@ sub reformat_split_maf_to_chr {
     while (my $block = <$IN>) {
         chomp $block;
         next if $block =~ /^\s*$/;
-        if ($block =~ /^\s*#/) {
-            print $OUT "$block\n\n";
-            next;
-        }
-
         my @lines = split /\n/, $block;
+        my @headers = grep { /^\s*#/ } @lines;
+        print $OUT join("\n", @headers), "\n\n" if @headers;
+        @lines = grep { !/^\s*#/ } @lines;
+        next unless @lines;
         for my $line (@lines) {
             if ($line =~ /^s\s+/) {
                 my @u = split /\s+/, $line;
@@ -626,11 +628,10 @@ sub reformat_anchorwave_maf {
     while (my $block = <$IN>) {
         chomp $block;
         next if $block =~ /^\s*$/;
-        if ($block =~ /^\s*#/) {
-            print $OUT "$block\n\n";
-            next;
-        }
         my @lines = split /\n/, $block;
+        my @headers = grep { /^\s*#/ } @lines;
+        print $OUT join("\n", @headers), "\n\n" if @headers;
+        @lines = grep { !/^\s*#/ } @lines;
         my @sidx = grep { $lines[$_] =~ /^s\s+/ } 0 .. $#lines;
         next unless @sidx >= 2;
 
@@ -667,16 +668,21 @@ sub sort_maf_by_target {
 
     my @headers;
     my @blocks;
+    my $has_eof = 0;
     local $/ = "\n\n";
     while (my $block = <$IN>) {
         chomp $block;
         next if $block =~ /^\s*$/;
-        if ($block =~ /^\s*#/) {
-            push @headers, $block;
-            next;
-        }
-
         my @lines = split /\n/, $block;
+        for my $line (grep { /^\s*#/ } @lines) {
+            if ($line =~ /^\s*##eof\b/i) {
+                $has_eof = 1;
+            } else {
+                push @headers, $line;
+            }
+        }
+        @lines = grep { !/^\s*#/ } @lines;
+        next unless @lines;
         my ($src, $start) = ('', 0);
         for my $line (@lines) {
             next unless $line =~ /^s\s+/;
@@ -713,6 +719,7 @@ sub sort_maf_by_target {
     for my $b (@blocks) {
         print $OUT $b->{block}, "\n\n";
     }
+    print $OUT "##eof maf\n" if $has_eof;
     close $OUT;
 }
 

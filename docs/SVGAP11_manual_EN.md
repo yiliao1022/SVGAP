@@ -238,7 +238,7 @@ perl SVGAP_pipeline.pl \
 
 ### 4.3 Start from aligner outputs
 
-If the inputs are minimap2/LAST/LASTZ/MUMmer/AnchorWave outputs, `01_Convert2Axt.pl` converts them to AXT.
+If the inputs are Minimap2/LAST/LASTZ/MUMmer4/AnchorWave outputs, `01_Convert2Axt.pl` converts them to AXT. See the [version2 English manual](SVGAP_version2_manual_EN.md#43-aligner-compatibility-and-file-names) for complete formats, naming rules, and commands.
 
 ```bash
 perl SVGAP_pipeline.pl \
@@ -322,7 +322,7 @@ perl 01_Convert2Axt.pl \
 
 | Option | Meaning |
 |---|---|
-| `--ali` | Alignment type: `last`, `lastz`, `maf`, `mummer`, `minimap2`, `anchorwave`. |
+| `--ali` | Alignment type: `last`, `lastz`, `maf`, `mummer/mummer4`, `minimap2`, `anchorwave`. |
 | `--input` | Input alignment directory. |
 | `--wk` | Working/output directory. |
 | `--tname` | Target/reference name. Default: `Ref`. |
@@ -779,7 +779,9 @@ perl 12_combine_genotype_CXSV.pl \
 | `--genome_dir` / `--gd` | Genome FASTA directory. |
 | `--start_from` | Start point: `align`, `maf`, or `axt`. Default: `align`. |
 | `--align_dir` / `--input` | Aligner output directory. |
-| `--aligner` / `--ali` | Aligner type: `minimap2`, `last`, `lastz`, `mummer`, `anchorwave`, `maf`. |
+| `--aligner` / `--ali` | Aligner type: `minimap2`, `last`, `lastz`, `mummer/mummer4`, `anchorwave`, `maf`. |
+| `--align_mode` | `auto`, `chr`, or `ctg`; use `ctg` for split-contig alignments. |
+| `--align_sizes` | Original chromosome sizes for `ctg` mode; repeatable. |
 | `--maf_dir` | Forward MAF directory. |
 | `--maf_reciprocal_dir` | True independent reciprocal MAF directory. |
 | `--axt_dir` / `--ad` | Forward AXT directory. |

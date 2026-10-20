@@ -75,3 +75,18 @@ See `trash/MANIFEST_trash.txt` for details.
    F1 both increased to 1.000 (44/44 events and 70/70 carrier genotypes), with
    zero extra inversion candidates. The full pipeline took 20.1 seconds versus
    18.5 seconds for the faster, lower-sensitivity alignment.
+
+## 2026-10-20: multi-aligner input revision
+
+1. Documented and verified a common normalization path for Minimap2 PAF,
+   LAST/LASTZ MAF, MUMmer4 delta, AnchorWave MAF, generic MAF, and AXT input.
+2. Added `mummer4` as an alias for `mummer` and made aligner and coordinate-mode
+   option values case-insensitive.
+3. Exposed split-contig coordinate restoration through top-level
+   `--align_mode` and repeatable `--align_sizes` options.
+4. Fixed loss of the first AnchorWave or split-contig MAF alignment when the
+   MAF header and first alignment were not separated by a blank line.
+5. Added aligner-specific commands, naming rules, reciprocal-alignment guidance,
+   and sensitivity recommendations to both version2 manuals.
+6. A real MUMmer4 delta completed the full version2 workflow. Both vg-ready VCFs
+   passed reference-aware validation with zero errors and zero warnings.

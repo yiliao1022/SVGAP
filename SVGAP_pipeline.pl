@@ -58,6 +58,8 @@ my %opt = (
     start_from => 'align',          # align | maf | axt
     align_dir => '',
     aligner => 'minimap2',
+    align_mode => 'auto',           # auto | chr | ctg
+    align_sizes => [],              # original chromosome sizes for split-contig input
     maf_dir => '',
     maf_reciprocal_dir => '',       # optional, true independently generated Query-vs-Ref MAFs
     axt_dir => '',
@@ -129,6 +131,8 @@ GetOptions(
     'start_from=s' => \$opt{start_from},
     'align_dir|input=s' => \$opt{align_dir},
     'aligner|ali=s' => \$opt{aligner},
+    'align_mode|align-mode=s' => \$opt{align_mode},
+    'align_sizes|align-sizes=s@' => \$opt{align_sizes},
     'maf_dir=s' => \$opt{maf_dir},
     'maf_reciprocal_dir=s' => \$opt{maf_reciprocal_dir},
     'axt_dir|ad=s' => \$opt{axt_dir},
@@ -185,6 +189,9 @@ GetOptions(
     'version' => \$opt{version},
     'help|h' => \$opt{help},
 ) or die usage();
+
+$opt{aligner} = lc($opt{aligner} || '');
+$opt{align_mode} = lc($opt{align_mode} || 'auto');
 
 if ($opt{version}) {
     print "SVGAP version2\n";
@@ -401,6 +408,10 @@ close $LOG;
 sub validate_options {
     my ($opt) = @_;
     die "ERROR: --start_from must be align, maf or axt.\n" . usage() unless $opt->{start_from} =~ /^(align|maf|axt)$/;
+    die "ERROR: --aligner must be minimap2, last, lastz, mummer/mummer4, anchorwave, or maf.\n"
+        unless $opt->{aligner} =~ /^(minimap2|last|lastz|mummer|mummer4|anchorwave|maf)$/;
+    die "ERROR: --align_mode must be auto, chr, or ctg.\n"
+        unless $opt->{align_mode} =~ /^(auto|chr|ctg)$/;
     die "ERROR: --threads must be >= 1.\n" unless $opt->{threads} >= 1;
     die "ERROR: --reciprocal_strategy must be auto, qnet, true or both.\n" . usage()
         unless $opt->{reciprocal_strategy} =~ /^(auto|qnet|true|both)$/;
@@ -439,14 +450,20 @@ sub prepare_or_resolve_axt {
 
     if ($opt->{start_from} eq 'align') {
         # Convert aligner output to forward AXT only. No fake reciprocal AXT is generated.
-        run_cmd($LOG, $opt->{dry_run}, "perl '$Bin/01_Convert2Axt.pl' --ali '$opt->{aligner}' --input '$opt->{align_dir}' --wk '$axt_root' --tname '$opt->{refname}' --qname Query --t $opt->{threads} --ucsc '$opt{ucsc}' --tba '$opt{tba}' --k8 '$opt{k8}' --paftools '$opt{paftools}' --mum320 '$opt{mum320}'");
+        my $convert_cmd = "perl '$Bin/01_Convert2Axt.pl' --ali '$opt->{aligner}' --input '$opt->{align_dir}' --wk '$axt_root' --tname '$opt->{refname}' --qname Query --mode '$opt->{align_mode}' --t $opt->{threads} --ucsc '$opt{ucsc}' --tba '$opt{tba}' --k8 '$opt{k8}' --paftools '$opt{paftools}' --mum320 '$opt{mum320}'";
+        $convert_cmd .= join('', map { " --sizes '$_'" } @{ $opt->{align_sizes} || [] });
+        run_cmd($LOG, $opt->{dry_run}, $convert_cmd);
         $fwd = "$axt_root/Target_$opt->{refname}";
     } elsif ($opt->{start_from} eq 'maf') {
-        run_cmd($LOG, $opt->{dry_run}, "perl '$Bin/01_Convert2Axt.pl' --ali maf --input '$opt->{maf_dir}' --wk '$axt_root' --tname '$opt->{refname}' --qname Query --t $opt->{threads} --ucsc '$opt{ucsc}' --tba '$opt{tba}'");
+        my $convert_cmd = "perl '$Bin/01_Convert2Axt.pl' --ali maf --input '$opt->{maf_dir}' --wk '$axt_root' --tname '$opt->{refname}' --qname Query --mode '$opt->{align_mode}' --t $opt->{threads} --ucsc '$opt{ucsc}' --tba '$opt{tba}'";
+        $convert_cmd .= join('', map { " --sizes '$_'" } @{ $opt->{align_sizes} || [] });
+        run_cmd($LOG, $opt->{dry_run}, $convert_cmd);
         $fwd = "$axt_root/Target_$opt->{refname}";
         if ($opt->{maf_reciprocal_dir}) {
             my $rec_root = "$axt_root/independent_reciprocal_from_maf";
-            run_cmd($LOG, $opt->{dry_run}, "perl '$Bin/01_Convert2Axt.pl' --ali maf --input '$opt->{maf_reciprocal_dir}' --wk '$rec_root' --tname Reciprocal --qname Ref --t $opt->{threads} --ucsc '$opt{ucsc}' --tba '$opt{tba}'");
+            my $rec_convert_cmd = "perl '$Bin/01_Convert2Axt.pl' --ali maf --input '$opt->{maf_reciprocal_dir}' --wk '$rec_root' --tname Reciprocal --qname Ref --mode '$opt->{align_mode}' --t $opt->{threads} --ucsc '$opt{ucsc}' --tba '$opt{tba}'";
+            $rec_convert_cmd .= join('', map { " --sizes '$_'" } @{ $opt->{align_sizes} || [] });
+            run_cmd($LOG, $opt->{dry_run}, $rec_convert_cmd);
             $rec = "$rec_root/Target_Reciprocal";
         }
     } elsif ($opt->{start_from} eq 'axt') {
@@ -760,7 +777,10 @@ Required:
 Start options:
   --start_from    align, maf or axt [align]
   --align_dir     Pairwise aligner output directory. Required for --start_from align.
-  --aligner       minimap2, last, lastz, mummer, anchorwave, or maf [minimap2]
+  --aligner       minimap2, last, lastz, mummer/mummer4, anchorwave, or maf [minimap2]
+                  Names are case-insensitive.
+  --align_mode    auto, chr, or ctg [auto]. Use ctg for split-query alignments.
+  --align_sizes FILE      Original chromosome size file for ctg mode; repeatable.
   --maf_dir       Existing forward MAF directory. Required for --start_from maf.
   --axt_dir       Existing forward AXT directory, or a parent directory containing
                   Target_<refname>/.

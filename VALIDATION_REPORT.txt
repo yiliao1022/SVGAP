@@ -39,3 +39,15 @@ Date: 2026-07-07
 - The full accuracy-oriented run completed in 20.101 seconds with two workers.
 - Final All.SV.vg.vcf (88 records) and All.SVGAP.vg.vcf (128 records) pass
   reference validation with zero errors and zero warnings.
+
+2026-10-20 multi-aligner validation update:
+- The converter accepts case-insensitive aligner names and the `mummer4` alias.
+- A real MUMmer4 4.0.1 nucmer/delta-filter output converted to AXT and completed
+  the full version2 pipeline. All.SV.vg.vcf (67 records) and All.SVGAP.vg.vcf
+  (98 records) passed reference-aware validation with zero errors and warnings.
+- Representative LAST, LASTZ, generic MAF, and AnchorWave MAF inputs each
+  converted to nonempty AXT. The AnchorWave test used chromosome-only source
+  IDs and confirmed that the first alignment block is retained.
+- A split-contig MAF test restored `SIM001.chr01_101_500` offset 0 to original
+  chromosome coordinate 101 and retained an adjacent MAF header/first block.
+- Minimap2 PAF remains covered by the two-sample end-to-end truth benchmark.

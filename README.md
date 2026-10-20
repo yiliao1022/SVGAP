@@ -32,8 +32,13 @@ perl SVGAP_pipeline.pl \
   --threads 16
 ```
 
-The pipeline accepts Minimap2 PAF, MUMmer delta, MAF, or existing AXT input.
-Run `perl SVGAP_pipeline.pl --help` for all modes and options.
+SVGAP consumes alignment files produced externally; it does not run the
+aligner itself. Supported inputs are Minimap2 PAF, LAST/LASTZ pairwise MAF,
+MUMmer4 delta, AnchorWave pairwise MAF, generic pairwise MAF, and existing
+forward AXT. Every input path is normalized to forward AXT before the common
+chain/net, SV discovery, and genotyping stages. See the version2 manuals for
+file names, tested commands, split-contig coordinate restoration, and aligner
+specific recommendations.
 
 For inversion-sensitive Minimap2 input, create PAF with
 `-x asm5 -c --cs=long --mask-level 1`. SVGAP uses a 1 kb inversion floor by
@@ -53,10 +58,10 @@ included reference-aware validator.
 
 ## Documentation
 
-- [中文手册](docs/SVGAP11_manual_CN.md)
 - [version2 中文运行手册](docs/SVGAP_version2_manual_CN.md)
-- [English manual](docs/SVGAP11_manual_EN.md)
 - [version2 English manual](docs/SVGAP_version2_manual_EN.md)
+- [version1 中文手册](docs/SVGAP11_manual_CN.md)
+- [version1 English manual](docs/SVGAP11_manual_EN.md)
 - [VG-ready VCF 中文说明](VG_READY_VCF_README_CN.md)
 - [VG-ready VCF English notes](VG_READY_VCF_README_EN.md)
 

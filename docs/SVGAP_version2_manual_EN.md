@@ -32,6 +32,8 @@ SVGAP version2
 8. Independent jobs use core Perl `fork()/wait()` parallelism and need no CPAN
    runtime module.
 9. Minimap2 PAF conversion skips the unused `paftools.js call` pass by default.
+10. Minimap2, LAST, LASTZ, MUMmer4, AnchorWave, generic MAF, and AXT entry
+    points normalize to forward AXT and share the same downstream algorithms.
 
 ## 3. Environment check
 
@@ -87,33 +89,39 @@ Sample02
 
 The final VCF sample order follows this list after removing `--refname`.
 
-### 4.3 Alignment file names
+### 4.3 Aligner compatibility and file names
 
-Minimap2 PAF:
+SVGAP does not run an external whole-genome aligner. It consumes PAF, MAF,
+delta, or AXT produced by an aligner, converts the input to a common forward
+AXT representation, and then uses the same chain/net, SV discovery, and
+population-genotyping stages.
 
-```text
-RefvsSample01.chr.paf
-RefvsSample02.chr.paf
-```
+| Aligner or entry point | SVGAP input | Top-level options | Example file | Conversion |
+|---|---|---|---|---|
+| Minimap2 | PAF with CIGAR (`-c`) | `--start_from align --aligner minimap2` | `RefvsSample01.chr.paf` | `paftools.js view` → MAF → AXT |
+| LAST | Pairwise MAF | `--start_from align --aligner last` | `RefvsSample01.chr.maf` | Add MAF header, sort → AXT |
+| LASTZ | Pairwise MAF | `--start_from align --aligner lastz` | `RefvsSample01.chr.maf` | Add MAF header, sort → AXT |
+| MUMmer4/nucmer | delta | `--start_from align --aligner mummer4` | `RefvsSample01.chr.delta` | Bundled `delta2maf` → AXT |
+| AnchorWave | Pairwise MAF | `--start_from align --aligner anchorwave` | `RefvsSample01.chr.maf` | Restore genome prefixes, internal sort → AXT |
+| Other standard MAF | Pairwise MAF | `--start_from maf --maf_dir DIR` | `RefvsSample01.maf` | Generic MAF → AXT |
+| Existing AXT | Forward AXT | `--start_from axt --axt_forward_dir DIR` | `RefvsSample01.axt` | No conversion |
 
-MAF:
+`mummer` and `mummer4` are equivalent option values, and aligner names are
+case-insensitive. The `.chr` component is optional. For alignments against
+SVGAP split query contigs, use `.ctg.paf`, `.ctg.maf`, or `.ctg.delta` together
+with `--align_mode ctg --align_sizes FILE`.
 
-```text
-RefvsSample01.maf
-RefvsSample02.maf
-```
+The `Ref` and `Sample01` portions of a file name must match the genome IDs in
+`g.list` and the FASTA files. Standard MAF source names should be
+`Ref.chr01` and `Sample01.chr01`. AnchorWave MAF may use chromosome-only names
+such as `chr01`; its dedicated converter restores genome prefixes from the file
+name. The first `s` line in each AnchorWave block must be reference and the
+second must be query.
 
-AXT:
-
-```text
-RefvsSample01.axt
-RefvsSample02.axt
-```
-
-version2 uses tnet and qnet from the forward alignment. Do not create a false
-reciprocal alignment by swapping coordinates in the forward file. If truly
-independent query-vs-reference alignments are available, provide them through
-the reciprocal alignment options.
+version2 derives tnet and qnet from one forward alignment, so every aligner can
+use the forward-only path. Swapping coordinates in a forward file does not
+create an independent reciprocal alignment. Truly independent query-vs-reference
+MAF or AXT can be supplied through the reciprocal options.
 
 ## 5. Recommended commands
 
@@ -147,7 +155,104 @@ perl SVGAP_pipeline.pl \
   --threads 16
 ```
 
-### 5.2 Start from MAF
+### 5.2 Start from LAST MAF
+
+This is a common template; tune LAST parameters for the assembly divergence:
+
+```bash
+lastdb -P16 lastdb/Ref genomes/Ref
+lastal -P16 lastdb/Ref genomes/Sample01 | last-split \
+  > alignments/RefvsSample01.chr.maf
+
+perl SVGAP_pipeline.pl \
+  --refname Ref \
+  --glist genomes/g.list \
+  --genome_dir genomes \
+  --start_from align \
+  --aligner last \
+  --align_dir alignments \
+  --outdir SVGAP_version2_run \
+  --threads 16
+```
+
+FASTA headers should contain genome prefixes such as `Ref.chr01` and
+`Sample01.chr01`.
+
+### 5.3 Start from LASTZ MAF
+
+```bash
+lastz 'genomes/Ref[multiple]' genomes/Sample01 --format=maf \
+  > alignments/RefvsSample01.chr.maf
+
+perl SVGAP_pipeline.pl \
+  --refname Ref \
+  --glist genomes/g.list \
+  --genome_dir genomes \
+  --start_from align \
+  --aligner lastz \
+  --align_dir alignments \
+  --outdir SVGAP_version2_run \
+  --threads 16
+```
+
+### 5.4 Start from MUMmer4 delta
+
+version2 accepts delta written by MUMmer4 `nucmer`. Use many-to-many
+`delta-filter -m` when rearrangement sensitivity matters. `delta-filter -1`
+can discard genuine overlapping rearrangement alignments.
+
+```bash
+nucmer --threads 16 --maxmatch \
+  -p work/RefvsSample01 genomes/Ref genomes/Sample01
+
+delta-filter -m -i 90 -l 100 work/RefvsSample01.delta \
+  > alignments/RefvsSample01.chr.delta
+
+perl SVGAP_pipeline.pl \
+  --refname Ref \
+  --glist genomes/g.list \
+  --genome_dir genomes \
+  --start_from align \
+  --aligner mummer4 \
+  --align_dir alignments \
+  --outdir SVGAP_version2_run \
+  --threads 16
+```
+
+`nucmer` and `delta-filter` come from the external MUMmer4 installation. SVGAP
+bundles the delta-to-MAF converter under `pub/MUMMER/`.
+
+### 5.5 Start from AnchorWave MAF
+
+Use the `genoAli` or `proali` workflow for your AnchorWave version to generate
+one pairwise MAF per query, saved as:
+
+```text
+alignments/RefvsSample01.chr.maf
+alignments/RefvsSample02.chr.maf
+```
+
+Then run:
+
+```bash
+perl SVGAP_pipeline.pl \
+  --refname Ref \
+  --glist genomes/g.list \
+  --genome_dir genomes \
+  --start_from align \
+  --aligner anchorwave \
+  --align_dir alignments \
+  --outdir SVGAP_version2_run \
+  --threads 16
+```
+
+Reference must be the first `s` line in each AnchorWave MAF block.
+Chromosome-only source names such as `chr01` are accepted; the dedicated
+converter changes them to `Ref.chr01` and `Sample01.chr01`. Anchor/CDS settings
+affect intergenic-SV and rearrangement recall, so confirm that the output MAF
+retains reverse-strand blocks and long gaps.
+
+### 5.6 Start from another standard MAF
 
 ```bash
 perl SVGAP_pipeline.pl \
@@ -160,7 +265,11 @@ perl SVGAP_pipeline.pl \
   --threads 16
 ```
 
-### 5.3 Start from AXT
+Generic input must be pairwise MAF with reference before query in each block,
+and source names must already include genome prefixes. Use the dedicated
+`--aligner anchorwave` path for chromosome-only AnchorWave MAF.
+
+### 5.7 Start from AXT
 
 ```bash
 perl SVGAP_pipeline.pl \
@@ -172,6 +281,62 @@ perl SVGAP_pipeline.pl \
   --outdir SVGAP_version2_run \
   --threads 16
 ```
+
+### 5.8 Split-contig alignment
+
+Split a query first:
+
+```bash
+perl 01_Convert2Axt.pl \
+  --splitfa genomes/Sample01 \
+  --split_out split/Sample01 \
+  --bin 10000000 \
+  --slide 10000
+```
+
+Align `split/Sample01/Sample01.subcontigs.fa` and use `.ctg` in the result name,
+for example `RefvsSample01.ctg.paf`. The controller restores original chromosome
+coordinates with:
+
+```bash
+perl SVGAP_pipeline.pl \
+  --refname Ref \
+  --glist genomes/g.list \
+  --genome_dir genomes \
+  --start_from align \
+  --aligner minimap2 \
+  --align_dir alignments \
+  --align_mode ctg \
+  --align_sizes split/Sample01/Sample01.sizes \
+  --outdir SVGAP_version2_run \
+  --threads 16
+```
+
+`--align_sizes` is repeatable. The converter can discover `.sizes` files in the
+alignment directory, but explicit paths make the run easier to reproduce.
+
+### 5.9 Forward and reciprocal alignment
+
+With forward input only, the default `--reciprocal_strategy auto` selects
+`qnet`; this is the recommended entry point for every aligner above. If true,
+independently generated query-vs-reference MAF is already available, use:
+
+```bash
+perl SVGAP_pipeline.pl \
+  --refname Ref \
+  --glist genomes/g.list \
+  --genome_dir genomes \
+  --start_from maf \
+  --maf_dir maf_forward \
+  --maf_reciprocal_dir maf_query_vs_ref \
+  --reciprocal_strategy true \
+  --outdir SVGAP_version2_run \
+  --threads 16
+```
+
+Reciprocal files must come from an independent Query-vs-Ref alignment. For
+existing AXT, use `--axt_forward_dir`, `--axt_reciprocal_dir`, and the same
+strategy.
 
 ## 6. Output layout
 
@@ -208,6 +373,10 @@ reference alleles, coordinates, `END`, `SVLEN`, ordering, and unique IDs.
 | Option | Meaning |
 |---|---|
 | `--threads N` | Maximum concurrent sample or file jobs |
+| `--start_from align|maf|axt` | Select aligner output, generic MAF, or existing AXT input |
+| `--aligner NAME` | `minimap2`, `last`, `lastz`, `mummer/mummer4`, `anchorwave`, or `maf` |
+| `--align_mode auto|chr|ctg` | Chromosome or split-contig coordinate mode |
+| `--align_sizes FILE` | Original chromosome sizes for `ctg` mode; repeatable |
 | `--speciesname NAME` | Species name written to VCF metadata |
 | `--skip_annotation` | Skip optional large-SV annotation |
 | `--skip_filter` | Use raw SynNet and `singRaw` MAF files |
@@ -306,6 +475,20 @@ contains at least one non-empty sequence.
 ### PAF, MAF, or AXT files are not detected
 
 Check the `RefvsQuery` naming convention and ensure that `Ref` matches `--refname`.
+
+Each entry point scans only its expected suffix: `.paf` for Minimap2, `.delta`
+for MUMmer4, and `.maf` for LAST, LASTZ, or AnchorWave. Check `Found N alignment
+file(s)` in the log. If `N` is smaller than the query count, fix the file names
+before continuing. After conversion, confirm that
+`01_axt/Target_Ref/RefvsQuery.axt` exists and is non-empty.
+
+### The aligner ran, but inversion or complex-SV recall is low
+
+SVGAP can only use evidence retained in its alignment input. Use
+`--mask-level 1` with Minimap2 and prefer `delta-filter -m` with MUMmer4. LAST,
+LASTZ, and AnchorWave output should retain reverse-strand blocks and long gaps.
+An early one-to-one or strict collinearity filter can remove genuine
+rearrangements before SVGAP sees them.
 
 ### One VCF category is missing
 

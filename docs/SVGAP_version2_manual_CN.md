@@ -29,6 +29,8 @@ SVGAP version2
 7. SynNet 阈值会根据 contig 长度自动缩放，默认也适用于短 contig。
 8. 各样本任务使用 Perl 内置 `fork()/wait()` 并行，无需额外 CPAN 模块。
 9. Minimap2 PAF 转换默认不再执行流程未使用的 `paftools.js call`。
+10. Minimap2、LAST、LASTZ、MUMmer4、AnchorWave、通用 MAF 和 AXT 入口统一
+    转换为 forward AXT，并共用同一套下游算法。
 
 ## 3. 环境检查
 
@@ -89,32 +91,34 @@ Sample02
 
 最终 VCF 的样本顺序按照该文件去掉 `--refname` 后的顺序确定。
 
-### 4.3 比对输入命名
+### 4.3 Aligner 兼容性与输入命名
 
-Minimap2 PAF：
+SVGAP 不负责运行外部全基因组 aligner。它读取 aligner 已产生的 PAF、MAF、
+delta 或 AXT，将其统一转换为 forward AXT，再进入完全相同的
+chain/net、SV discovery 和 population genotyping 流程。
 
-```text
-RefvsSample01.chr.paf
-RefvsSample02.chr.paf
-```
+| Aligner/入口 | SVGAP 输入 | 顶层参数 | 文件名示例 | 转换方式 |
+|---|---|---|---|---|
+| Minimap2 | PAF，必须包含 CIGAR（`-c`） | `--start_from align --aligner minimap2` | `RefvsSample01.chr.paf` | `paftools.js view` → MAF → AXT |
+| LAST | pairwise MAF | `--start_from align --aligner last` | `RefvsSample01.chr.maf` | 补 MAF header、排序 → AXT |
+| LASTZ | pairwise MAF | `--start_from align --aligner lastz` | `RefvsSample01.chr.maf` | 补 MAF header、排序 → AXT |
+| MUMmer4/nucmer | delta | `--start_from align --aligner mummer4` | `RefvsSample01.chr.delta` | bundled `delta2maf` → AXT |
+| AnchorWave | pairwise MAF | `--start_from align --aligner anchorwave` | `RefvsSample01.chr.maf` | 恢复 genome prefix、内部排序 → AXT |
+| 其他标准 MAF | pairwise MAF | `--start_from maf --maf_dir DIR` | `RefvsSample01.maf` | 通用 MAF → AXT |
+| 已有 AXT | forward AXT | `--start_from axt --axt_forward_dir DIR` | `RefvsSample01.axt` | 不再转换 |
 
-MAF：
+`mummer` 和 `mummer4` 是等价参数名；aligner 名称不区分大小写。`.chr` 可省略。
+若 query 使用 SVGAP 的 split-contig 坐标，文件名使用 `.ctg.paf`、`.ctg.maf`
+或 `.ctg.delta`，并提供 `--align_mode ctg --align_sizes FILE`。
 
-```text
-RefvsSample01.maf
-RefvsSample02.maf
-```
+文件名中的 `Ref`、`Sample01` 必须与 `g.list` 和 FASTA genome ID 一致。
+标准 MAF 的 sequence source 推荐为 `Ref.chr01` 和 `Sample01.chr01`。
+AnchorWave 的 MAF 可以只写 `chr01`，专用转换器会依据文件名补回 genome prefix；
+每个 block 的第一条 `s` 行必须是 reference，第二条必须是 query。
 
-AXT：
-
-```text
-RefvsSample01.axt
-RefvsSample02.axt
-```
-
-version2 可以利用 forward alignment 产生的 tnet 和 qnet，不要求把 forward
-比对简单交换坐标来制造 reciprocal alignment。若已有真正独立运行的
-query-vs-reference 比对，可通过 reciprocal 参数提供。
+version2 可以利用单次 forward alignment 产生的 tnet 和 qnet，不要求制造
+reciprocal alignment。简单交换 forward 文件坐标不能产生独立比对。真正独立
+运行的 query-vs-reference MAF/AXT 可以通过 reciprocal 参数提供。
 
 ## 5. 推荐运行方法
 
@@ -147,7 +151,102 @@ perl SVGAP_pipeline.pl \
   --threads 16
 ```
 
-### 5.2 从 MAF 开始
+### 5.2 从 LAST MAF 开始
+
+以下是常见模板，LAST 参数可按物种距离调整：
+
+```bash
+lastdb -P16 lastdb/Ref genomes/Ref
+lastal -P16 lastdb/Ref genomes/Sample01 | last-split \
+  > alignments/RefvsSample01.chr.maf
+
+perl SVGAP_pipeline.pl \
+  --refname Ref \
+  --glist genomes/g.list \
+  --genome_dir genomes \
+  --start_from align \
+  --aligner last \
+  --align_dir alignments \
+  --outdir SVGAP_version2_run \
+  --threads 16
+```
+
+FASTA header 应包含 genome prefix，例如 `Ref.chr01` 和 `Sample01.chr01`。
+
+### 5.3 从 LASTZ MAF 开始
+
+```bash
+lastz 'genomes/Ref[multiple]' genomes/Sample01 --format=maf \
+  > alignments/RefvsSample01.chr.maf
+
+perl SVGAP_pipeline.pl \
+  --refname Ref \
+  --glist genomes/g.list \
+  --genome_dir genomes \
+  --start_from align \
+  --aligner lastz \
+  --align_dir alignments \
+  --outdir SVGAP_version2_run \
+  --threads 16
+```
+
+### 5.4 从 MUMmer4 delta 开始
+
+version2 直接接受 MUMmer4 `nucmer` 产生的 delta。为了保留倒位和重排证据，
+推荐使用 many-to-many `delta-filter -m`；`delta-filter -1` 可能删除相互重叠的
+真实 rearrangement alignment。
+
+```bash
+nucmer --threads 16 --maxmatch \
+  -p work/RefvsSample01 genomes/Ref genomes/Sample01
+
+delta-filter -m -i 90 -l 100 work/RefvsSample01.delta \
+  > alignments/RefvsSample01.chr.delta
+
+perl SVGAP_pipeline.pl \
+  --refname Ref \
+  --glist genomes/g.list \
+  --genome_dir genomes \
+  --start_from align \
+  --aligner mummer4 \
+  --align_dir alignments \
+  --outdir SVGAP_version2_run \
+  --threads 16
+```
+
+`nucmer` 和 `delta-filter` 来自外部 MUMmer4；delta-to-MAF 转换程序已包含在
+SVGAP 的 `pub/MUMMER/` 中。
+
+### 5.5 从 AnchorWave MAF 开始
+
+先按当前 AnchorWave 版本的 `genoAli` 或 `proali` 流程生成每个 query 的
+pairwise MAF，并保存为：
+
+```text
+alignments/RefvsSample01.chr.maf
+alignments/RefvsSample02.chr.maf
+```
+
+然后运行：
+
+```bash
+perl SVGAP_pipeline.pl \
+  --refname Ref \
+  --glist genomes/g.list \
+  --genome_dir genomes \
+  --start_from align \
+  --aligner anchorwave \
+  --align_dir alignments \
+  --outdir SVGAP_version2_run \
+  --threads 16
+```
+
+AnchorWave MAF 中 reference 必须是每个 block 的第一条 `s` 行。允许 sequence
+ID 只写 `chr01`；专用转换器会补为 `Ref.chr01` 和 `Sample01.chr01`。
+AnchorWave 的 anchor/CDS 配置会影响 intergenic SV 和 rearrangement recall，
+因此应检查输出 MAF 是否保留反向链和长 gap。
+
+### 5.6 从其他标准 MAF 开始
 
 ```bash
 perl SVGAP_pipeline.pl \
@@ -160,7 +259,11 @@ perl SVGAP_pipeline.pl \
   --threads 16
 ```
 
-### 5.3 从 AXT 开始
+通用 MAF 应为 pairwise MAF，reference 在每个 block 中位于 query 之前，且
+source ID 已包含 genome prefix。AnchorWave chromosome-only MAF 应使用上一节
+的 `--aligner anchorwave`，不能直接走通用 MAF 入口。
+
+### 5.7 从 AXT 开始
 
 ```bash
 perl SVGAP_pipeline.pl \
@@ -172,6 +275,59 @@ perl SVGAP_pipeline.pl \
   --outdir SVGAP_version2_run \
   --threads 16
 ```
+
+### 5.8 Split-contig alignment
+
+先切分 query：
+
+```bash
+perl 01_Convert2Axt.pl \
+  --splitfa genomes/Sample01 \
+  --split_out split/Sample01 \
+  --bin 10000000 \
+  --slide 10000
+```
+
+对 `split/Sample01/Sample01.subcontigs.fa` 进行比对，输出文件名使用 `.ctg`，
+例如 `RefvsSample01.ctg.paf`。主流程会把 subcontig 坐标恢复到原始染色体：
+
+```bash
+perl SVGAP_pipeline.pl \
+  --refname Ref \
+  --glist genomes/g.list \
+  --genome_dir genomes \
+  --start_from align \
+  --aligner minimap2 \
+  --align_dir alignments \
+  --align_mode ctg \
+  --align_sizes split/Sample01/Sample01.sizes \
+  --outdir SVGAP_version2_run \
+  --threads 16
+```
+
+`--align_sizes` 可以重复。若 `.sizes` 文件放在 alignment 目录，转换器也会
+自动发现；显式提供更容易复现。
+
+### 5.9 Forward 与 reciprocal alignment
+
+默认 `--reciprocal_strategy auto` 在只有 forward input 时选择 `qnet`，这是
+所有上述 aligner 的推荐入口。若已经独立运行了 query-vs-reference MAF：
+
+```bash
+perl SVGAP_pipeline.pl \
+  --refname Ref \
+  --glist genomes/g.list \
+  --genome_dir genomes \
+  --start_from maf \
+  --maf_dir maf_forward \
+  --maf_reciprocal_dir maf_query_vs_ref \
+  --reciprocal_strategy true \
+  --outdir SVGAP_version2_run \
+  --threads 16
+```
+
+reciprocal 文件必须来自真正独立运行的 Query-vs-Ref alignment。若已经是
+AXT，则使用 `--axt_forward_dir`、`--axt_reciprocal_dir` 和相同 strategy。
 
 ## 6. 输出目录
 
@@ -208,6 +364,10 @@ SVGAP_version2_run/
 | 参数 | 说明 |
 |---|---|
 | `--threads N` | 独立样本或文件任务的最大并行数 |
+| `--start_from align|maf|axt` | 选择 aligner 输出、通用 MAF 或已有 AXT 入口 |
+| `--aligner NAME` | `minimap2`、`last`、`lastz`、`mummer/mummer4`、`anchorwave` 或 `maf` |
+| `--align_mode auto|chr|ctg` | 普通染色体或 split-contig 坐标模式 |
+| `--align_sizes FILE` | `ctg` 模式的原始染色体 sizes；可重复 |
 | `--speciesname NAME` | 写入 VCF 的物种名 |
 | `--skip_annotation` | 跳过可选的大 SV 注释 |
 | `--skip_filter` | 使用原始 SynNet 和 `singRaw` MAF |
@@ -302,6 +462,18 @@ perl 14_validate_vg_vcf.pl \
 ### 找不到 PAF、MAF 或 AXT
 
 检查文件名是否符合 `RefvsQuery` 形式，并确认 `Ref` 与 `--refname` 一致。
+
+各入口只扫描对应后缀：Minimap2 为 `.paf`，MUMmer4 为 `.delta`，
+LAST/LASTZ/AnchorWave 为 `.maf`。查看日志中的 `Found N alignment file(s)`；
+若 `N` 小于 query 数量，应先修正文件名。转换成功后还应确认
+`01_axt/Target_Ref/RefvsQuery.axt` 非空。
+
+### Aligner 已运行，但倒位或复杂 SV recall 偏低
+
+SVGAP 只能使用输入 alignment 中保留的证据。Minimap2 使用
+`--mask-level 1`；MUMmer4 优先使用 `delta-filter -m`；LAST、LASTZ 和
+AnchorWave 应保留 reverse-strand block 与长 gap。过早做 one-to-one 或严格
+collinear 过滤会在 SVGAP 之前删除真实 rearrangement。
 
 ### 没有产生某一类 VCF
 

@@ -238,7 +238,7 @@ perl SVGAP_pipeline.pl \
 
 ### 4.3 从 aligner 原始输出开始
 
-如果从 minimap2/LAST/LASTZ/MUMmer/AnchorWave 的输出开始，由 `01_Convert2Axt.pl` 统一转换为 AXT。
+如果从 Minimap2/LAST/LASTZ/MUMmer4/AnchorWave 的输出开始，由 `01_Convert2Axt.pl` 统一转换为 AXT。完整的格式、命名和命令示例见 [version2 中文运行手册](SVGAP_version2_manual_CN.md#43-aligner-兼容性与输入命名)。
 
 ```bash
 perl SVGAP_pipeline.pl \
@@ -328,7 +328,7 @@ perl 01_Convert2Axt.pl \
 
 | 参数 | 说明 |
 |---|---|
-| `--ali` | 输入 alignment 类型：`last`、`lastz`、`maf`、`mummer`、`minimap2`、`anchorwave`。|
+| `--ali` | 输入 alignment 类型：`last`、`lastz`、`maf`、`mummer/mummer4`、`minimap2`、`anchorwave`。|
 | `--input` | alignment 文件所在目录。|
 | `--wk` | 工作目录/输出目录。|
 | `--tname` | target/reference 名称，默认 `Ref`。|
@@ -838,7 +838,9 @@ perl 12_combine_genotype_CXSV.pl \
 | `--genome_dir` / `--gd` | genome FASTA 目录。|
 | `--start_from` | 起点：`align`、`maf`、`axt`，默认 `align`。|
 | `--align_dir` / `--input` | aligner 原始输出目录。|
-| `--aligner` / `--ali` | aligner 类型：`minimap2`、`last`、`lastz`、`mummer`、`anchorwave`、`maf`。|
+| `--aligner` / `--ali` | aligner 类型：`minimap2`、`last`、`lastz`、`mummer/mummer4`、`anchorwave`、`maf`。|
+| `--align_mode` | `auto`、`chr` 或 `ctg`；split-contig alignment 使用 `ctg`。|
+| `--align_sizes` | `ctg` 模式的原始 chromosome sizes 文件；可重复。|
 | `--maf_dir` | forward MAF 目录。|
 | `--maf_reciprocal_dir` | 独立 reciprocal MAF 目录。|
 | `--axt_dir` / `--ad` | forward AXT 目录。|
