@@ -60,8 +60,6 @@ included reference-aware validator.
 
 - [version2 中文运行手册](docs/SVGAP_version2_manual_CN.md)
 - [version2 English manual](docs/SVGAP_version2_manual_EN.md)
-- [version1 中文手册](docs/SVGAP11_manual_CN.md)
-- [version1 English manual](docs/SVGAP11_manual_EN.md)
 - [VG-ready VCF 中文说明](VG_READY_VCF_README_CN.md)
 - [VG-ready VCF English notes](VG_READY_VCF_README_EN.md)
 
