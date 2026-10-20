@@ -11,6 +11,14 @@ repaired and optimized workflow is **version2**. Check an installation with:
 perl SVGAP_pipeline.pl --version
 ```
 
+## Versions
+
+- **version2 (current):** [release](https://github.com/yiliao1022/SVGAP/releases/tag/version2), [tag](https://github.com/yiliao1022/SVGAP/tree/version2), and the Chinese/English manuals linked below.
+- **version1 (original workflow):** [release](https://github.com/yiliao1022/SVGAP/releases/tag/version1), [fixed branch](https://github.com/yiliao1022/SVGAP/tree/version1), and [original README](https://github.com/yiliao1022/SVGAP/blob/version1/README.md).
+
+The `version1` branch and tag remain fixed at the original commit. New
+development is published as version2.
+
 ## Quick start
 
 Prepare one FASTA per assembly in `genomes/`. Sequence names should use the

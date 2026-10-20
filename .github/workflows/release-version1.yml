@@ -1,0 +1,72 @@
+name: Publish original version1 release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/release-version1.yml
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository and tags
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Package the unchanged version1 tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir dist
+          git archive \
+            --format=tar.gz \
+            --prefix=SVGAP-version1/ \
+            --output=dist/SVGAP_version1_original.tar.gz \
+            version1
+          cd dist
+          sha256sum SVGAP_version1_original.tar.gz \
+            > SVGAP_version1_original.tar.gz.sha256
+
+      - name: Write version1 release notes
+        shell: bash
+        run: |
+          cat > dist/version1-release-notes.md <<'EOF'
+          # SVGAP version1
+
+          This release preserves the original SVGAP workflow at commit `4c541f4`.
+
+          - The source is unchanged from the original version1 snapshot.
+          - The original README is the version1 usage guide.
+          - Current development, repaired workflows, and expanded manuals are available in version2.
+
+          Download `SVGAP_version1_original.tar.gz` and verify it with the attached SHA256 file.
+          EOF
+
+      - name: Create or update version1 release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh release view version1 >/dev/null 2>&1; then
+            gh release edit version1 \
+              --title "SVGAP version1 (original workflow)" \
+              --notes-file dist/version1-release-notes.md
+            gh release upload version1 \
+              dist/SVGAP_version1_original.tar.gz \
+              dist/SVGAP_version1_original.tar.gz.sha256 \
+              --clobber
+          else
+            gh release create version1 \
+              dist/SVGAP_version1_original.tar.gz \
+              dist/SVGAP_version1_original.tar.gz.sha256 \
+              --verify-tag \
+              --title "SVGAP version1 (original workflow)" \
+              --notes-file dist/version1-release-notes.md
+          fi
