@@ -1,0 +1,8 @@
+TEST	RECORDS	ERRORS	WARNINGS	NOTE
+All_top_level_perl_compile	15	0	0	perl -c passed for every production .pl file
+DEL_source_writer	1	0	0	explicit left-anchored DEL; REF matches reference; END/SVLEN consistent
+INS_source_writer	1	0	0	pure inserted ALTseq retained; explicit left-anchored INS
+small_indel_writer	2	0	0	explicit small DEL and INS
+CXSV_forward_projection	1	0	0	explicit reference/alternate event sequences
+CXSV_reverse_projection	1	0	0	reverse projection swaps and orients sequences correctly
+Integrated_final_VCF	7	0	0	large DEL/INS, small DEL/INS, CXSV, INV and SNP

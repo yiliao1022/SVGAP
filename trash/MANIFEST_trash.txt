@@ -1,0 +1,14 @@
+Files moved here to keep the production SVGAP workflow simple.
+They are not deleted and can be restored if needed.
+
+trash/benchmark_tools/
+  - simulate_population_variants_benchmark_shared.v4.pl: simulation/benchmark utility, not required for running SVGAP on real genomes.
+  - 13_compare_truth_SVGAP.pl: benchmark comparison utility, not required for production variant calling.
+  - 14_diagnose_small_indel_benchmark.pl: small-Indel benchmark diagnosis utility, not required for production variant calling.
+
+trash/integration_notes/
+  - SVGAP_pipeline.add_12_CXSV.patch: old integration patch, already applied in SVGAP_pipeline.pl.
+  - README_CXSV_integration.txt: old integration note, replaced by docs in this clean package.
+
+trash/legacy_utilities/
+  - FaFileChecl.pl, INS2TDP.pl, Mafreformat.pl, SplitFa.pl: legacy standalone utilities. Current step 01 integrates split/reformat functions; core pipeline does not call these files directly.

@@ -1,0 +1,29 @@
+Validation report for SVGAP11_clean_fixed
+Date: 2026-07-07
+
+1. All main workflow Perl scripts passed perl -c syntax checks:
+   SVGAP_pipeline.pl, 01_Convert2Axt.pl through 12_combine_genotype_CXSV.pl,
+   SVGAP_vcf_tools.pl, util/Test_dependency.pl.
+
+2. Optional scripts moved to trash also passed perl -c syntax checks.
+
+3. Package-local Parallel::ForkManager is available at:
+   lib/Parallel/ForkManager.pm
+
+4. Dry-run test of 02_ChainNetSyn.pl with --threads 2 did not emit the old warning:
+   WARNING: Parallel::ForkManager is not installed; falling back to single-thread mode
+
+5. All Perl scripts contain:
+   Author: Yi Liao @ scau.edu.cn
+
+2026-10-20 validation update:
+- All top-level production scripts and util/Test_dependency.pl pass perl -c.
+- The dependency checker passes and all independent work queues use core fork/wait.
+- 250-kb default-filter and --skip_filter workflows both complete and recover
+  12 large DEL plus 12 large INS records.
+- An identical 250-kb reference/query pair completes without invoking empty
+  large/small/INV genotypers.
+- A 1.2-Mb, two-query truth benchmark completes in 18.462 seconds with two
+  workers. Large-SV event F1 is 0.941176; small-InDel and SNP event F1 are 1.0.
+- Final All.SV.vg.vcf (85 records) and All.SVGAP.vg.vcf (125 records) pass
+  reference validation with zero errors and zero warnings.

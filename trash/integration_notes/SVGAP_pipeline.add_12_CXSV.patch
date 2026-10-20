@@ -1,0 +1,104 @@
+--- SVGAP_pipeline.pl
++++ SVGAP_pipeline.with_12_CXSV.pl
+@@ -16,6 +16,8 @@
+ # Standardized date: 2026-06-14
+ # Update: v11 fixes qnet PairwiseSV input by copying synnet files instead of
+ #         creating relative symlinks that can break in nested output folders.
++# Update: v12 adds 12_combine_genotype_CXSV.pl for bidirectional complex SV
++#         merging and population genotyping.
+ #
+ # Purpose:
+ #   One-command SVGAP workflow from one reference assembly and multiple query
+@@ -74,8 +76,14 @@
+     skip_pairwise_sv => 0,
+     skip_combine => 0,
+     skip_genotype => 0,
++    skip_cxsv => 0,
+     skip_snp => 0,
+     skip_annotation => 0,
++
++    cxsv_break_tolerance => 2000,
++    cxsv_min_ro => 0.50,
++    cxsv_len_ratio => 1.00,
++    cxsv_unknown_missing => 0,
+     dry_run => 0,
+     force => 0,
+     help => 0,
+@@ -117,8 +125,14 @@
+     'skip_pairwise_sv!' => \$opt{skip_pairwise_sv},
+     'skip_combine!' => \$opt{skip_combine},
+     'skip_genotype!' => \$opt{skip_genotype},
++    'skip_cxsv!' => \$opt{skip_cxsv},
+     'skip_snp!' => \$opt{skip_snp},
+     'skip_annotation!' => \$opt{skip_annotation},
++
++    'cxsv_break_tolerance|cxsv-break-tolerance=i' => \$opt{cxsv_break_tolerance},
++    'cxsv_min_ro|cxsv-min-ro=f' => \$opt{cxsv_min_ro},
++    'cxsv_len_ratio|cxsv-len-ratio=f' => \$opt{cxsv_len_ratio},
++    'cxsv_unknown_missing|cxsv-unknown-missing!' => \$opt{cxsv_unknown_missing},
+     'dry_run!' => \$opt{dry_run},
+     'force!' => \$opt{force},
+     'help|h' => \$opt{help},
+@@ -154,10 +168,11 @@
+ my $pairsv = "$opt{outdir}/04_pairwise_sv";
+ my $combined = "$opt{outdir}/05_combined_sv";
+ my $geno = "$opt{outdir}/06_genotype";
++my $cxsv = "$geno/CXSV";
+ my $snp = "$opt{outdir}/07_snp";
+ my $vcfdir = "$opt{outdir}/08_vcf";
+ my $ann = "$opt{outdir}/09_annotation";
+-make_path($axt_root,$chain_fwd,$chain_rec,$filter_fwd,$filter_rec,$pairsv,$combined,$geno,$snp,$vcfdir,$ann);
++make_path($axt_root,$chain_fwd,$chain_rec,$filter_fwd,$filter_rec,$pairsv,$combined,$geno,$cxsv,$snp,$vcfdir,$ann);
+
+ my ($fwd_axt, $independent_rec_axt) = prepare_or_resolve_axt(\%opt, $axt_root, $LOG);
+ my $reciprocal_strategy = choose_reciprocal_strategy(\%opt, $independent_rec_axt, $LOG);
+@@ -223,6 +238,20 @@
+     my $ins_small = "$combined/All.INTs.50bpsmall.bed.combined.sorted.txt";
+     my $inv_file = "$combined/All.INVs.bed.combined.sorted.txt";
+
++    # 6a. Combine and genotype complex SVs (CXSV) from bidirectional *.cxsv.sort rawSV files.
++    if (!$opt{skip_cxsv}) {
++        my $cxsv_cmd = "perl '$Bin/12_combine_genotype_CXSV.pl' --refname '$opt{refname}' --query_list '$query_list' --rawsv_dir '$pairsv' --outdir '$cxsv' --break_tolerance $opt{cxsv_break_tolerance} --min_ro $opt{cxsv_min_ro} --len_ratio $opt{cxsv_len_ratio}";
++        $cxsv_cmd .= " --unknown_missing" if $opt{cxsv_unknown_missing};
++        run_cmd($LOG, $opt{dry_run}, $cxsv_cmd);
++        if ($opt{dry_run} || -s "$cxsv/All.CXSV.vcf") {
++            run_cmd($LOG, $opt{dry_run}, "cp '$cxsv/All.CXSV.vcf' '$vcfdir/All.CXSV.vcf'");
++        } else {
++            logmsg($LOG, "Skipping CXSV VCF copy because $cxsv/All.CXSV.vcf was not created or is empty");
++        }
++    } else {
++        logmsg($LOG, "Skipping CXSV combine/genotyping because --skip_cxsv was set");
++    }
++
+     run_if_exists($LOG, $opt{dry_run}, $del_large, "perl '$Bin/06_genotype_DEL.pl' --bed '$del_large' --maf_dir '$singdir' --refname '$opt{refname}' --query_list '$query_list' --out '$geno/DEL.large' --threads $opt{threads}");
+     run_if_exists($LOG, $opt{dry_run}, $ins_large, "perl '$Bin/07_genotype_INS.pl' --bed '$ins_large' --maf_dir '$singdir' --genome_dir '$opt{genome_dir}' --refname '$opt{refname}' --query_list '$query_list' --out '$geno/INS.large' --threads $opt{threads}");
+
+@@ -278,6 +307,9 @@
+     die "ERROR: --threads must be >= 1.\n" unless $opt->{threads} >= 1;
+     die "ERROR: --reciprocal_strategy must be auto, qnet, true or both.\n" . usage()
+         unless $opt->{reciprocal_strategy} =~ /^(auto|qnet|true|both)$/;
++    die "ERROR: --cxsv_break_tolerance must be >= 0.\n" unless $opt->{cxsv_break_tolerance} >= 0;
++    die "ERROR: --cxsv_min_ro must be between 0 and 1.\n" unless $opt->{cxsv_min_ro} >= 0 && $opt->{cxsv_min_ro} <= 1;
++    die "ERROR: --cxsv_len_ratio must be >= 0.\n" unless $opt->{cxsv_len_ratio} >= 0;
+
+     return if $opt->{skip_convert};
+
+@@ -607,10 +639,18 @@
+   Do not create reciprocal AXT by simply reversing a forward AXT. That is only a
+   coordinate reordering, not an independent Query-vs-Ref alignment.
+
++CXSV options:
++  --skip_cxsv                 Skip complex SV merging/genotyping.
++  --cxsv_break_tolerance N    Breakpoint tolerance for merging CXSVs [2000].
++  --cxsv_min_ro FLOAT         Minimum reciprocal overlap for CXSV merging [0.50].
++  --cxsv_len_ratio FLOAT      Maximum relative length difference for CXSV merging [1.00].
++  --cxsv_unknown_missing      Output ./. for non-carrier CXSV samples instead of 0|0.
++
+ Main outputs:
+   OUTDIR/08_vcf/All.largeSV.raw.vcf
+   OUTDIR/08_vcf/All.largeSV.annotated.vcf   if annotation is enabled
+   OUTDIR/08_vcf/All.smallIndel.vcf
+   OUTDIR/08_vcf/All.sorted.SNP.vcf
++  OUTDIR/08_vcf/All.CXSV.vcf
+ USAGE
+ }

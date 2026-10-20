@@ -1,7 +1,15 @@
 #!/usr/bin/perl
+# Author: Yi Liao @ scau.edu.cn
 
 use strict;
 use warnings;
+use FindBin qw($Bin);
+use lib "$Bin/lib";
+use lib "$Bin/pub";
+use lib "$Bin/../lib";
+use lib "$Bin/../pub";
+use lib "$Bin/../../lib";
+use lib "$Bin/../../pub";
 
 # 从命令行参数获取目录路径
 my $dir = $ARGV[0] or die "Usage: $0 <directory path>\n";

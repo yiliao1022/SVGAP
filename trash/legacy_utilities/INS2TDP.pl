@@ -1,6 +1,14 @@
 #!/usr/bin/perl
+# Author: Yi Liao @ scau.edu.cn
 use strict;
 use warnings;
+use FindBin qw($Bin);
+use lib "$Bin/lib";
+use lib "$Bin/pub";
+use lib "$Bin/../lib";
+use lib "$Bin/../pub";
+use lib "$Bin/../../lib";
+use lib "$Bin/../../pub";
 use Getopt::Long;
 
 

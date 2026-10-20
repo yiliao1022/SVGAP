@@ -1,5 +1,14 @@
+#!/usr/bin/env perl
+# Author: Yi Liao @ scau.edu.cn
 use strict;
 use warnings;
+use FindBin qw($Bin);
+use lib "$Bin/lib";
+use lib "$Bin/pub";
+use lib "$Bin/../lib";
+use lib "$Bin/../pub";
+use lib "$Bin/../../lib";
+use lib "$Bin/../../pub";
 $/="\n>";
 open In, "$ARGV[0]" or die "$!";
 open Out, ">$ARGV[0].subcontigs.fa" or die "$!";

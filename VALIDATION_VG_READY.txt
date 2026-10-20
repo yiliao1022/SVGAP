@@ -1,0 +1,37 @@
+SVGAP vg-ready VCF validation
+Date: 2026-07-20
+
+Validation performed:
+1. perl -c passed for every top-level Perl script, including:
+   12_combine_genotype_CXSV.pl
+   13_prepare_vg_vcf.pl
+   14_validate_vg_vcf.pl
+   SVGAP_pipeline.pl
+2. Synthetic malformed symbolic DEL test:
+   input POS=21, BED_START=20, END=30, SVLEN=-10
+   output POS=20, END=30, SVLEN=-10, explicit left-anchored REF/ALT
+3. Synthetic legacy right-padded INS test:
+   converted to left-anchored explicit INS with END=POS and SVLEN=ALT-REF.
+4. Symbolic INV test:
+   true reference base restored; END and SVLEN verified.
+5. Forward CXSV sequence test:
+   complete reference and alternate event sequences exported explicitly.
+6. Reverse CXSV projection test:
+   reference/alternate sequence columns swapped correctly and projected to the original reference.
+7. Combined final VCF test:
+   4 synthetic records written; 0 validation errors and 0 warnings.
+
+8. Source genotyper tests with an empty MAF and a 300-bp synthetic reference:
+   - 06 DEL: explicit left-anchored REF/ALT, SVLEN=-3, validation errors=0.
+   - 07 INS: pure ALTseq retained as an explicit left-anchored insertion, SVLEN=3, validation errors=0.
+   - 08 small DEL/INS: both explicit and reference-consistent, validation errors=0.
+9. All top-level production Perl scripts passed `perl -c` after the final changes.
+10. bgzip/tabix auto-indexing was added; these executables were not installed in the validation environment, so compression/index creation was not executed here.
+
+11. Integrated final-VCF test:
+   large DEL + large INS + small DEL + small INS + explicit CXSV + symbolic INV + SNP
+   were merged into one sorted VCF; 7 records written, 0 skipped, 0 validation errors and 0 warnings.
+
+Limitation:
+The execution environment did not contain the vg binary, so an actual vg construct run was not performed here.
+The final VCFs were instead checked by the included reference-aware validator.
